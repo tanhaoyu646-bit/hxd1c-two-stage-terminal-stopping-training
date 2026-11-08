@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no,interactive-widget=resizes-content">
+  <meta name="theme-color" content="#06131d">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23061925'/%3E%3Cpath d='M13 39h38M18 39V20h28v19M24 48l5-9m11 9-5-9' stroke='%2358d7ff' stroke-width='5' fill='none'/%3E%3Ccircle cx='25' cy='29' r='3' fill='%23f0c457'/%3E%3Ccircle cx='39' cy='29' r='3' fill='%23f0c457'/%3E%3C/svg%3E">
+  <title>HXD1C 两段制动对标停车虚拟实训</title>
+  <link rel="stylesheet" href="./styles/terminal-stopping.css?v=two-stage-2">
+</head>
+<body class="candidate-entry-active">
+  <section id="candidate-gate" class="candidate-gate" role="dialog" aria-modal="true" aria-labelledby="candidate-title">
+    <form id="candidate-form" class="candidate-card" novalidate>
+      <span class="candidate-eyebrow">HXD1C · 终到作业专项</span>
+      <h1 id="candidate-title">两段制动对标停车虚拟实训</h1>
+      <p class="candidate-intro">请先登记学员信息，进入后再选择“教学模式”或“考评模式”。</p>
+      <div class="candidate-fields">
+        <label>姓名<input id="candidate-name" name="name" type="text" maxlength="20" autocomplete="name" placeholder="请输入姓名" required></label>
+        <label>学号<input id="candidate-student-id" name="studentId" type="text" maxlength="20" autocomplete="off" placeholder="请输入学号" required></label>
+      </div>
+      <p id="candidate-error" class="candidate-error" role="alert" aria-live="polite"></p>
+      <button id="candidate-submit" class="candidate-submit" type="submit" disabled>请填写姓名和学号</button>
+      <p id="candidate-load-status" class="candidate-load-status" data-state="loading" aria-live="polite">线路环境正在后台加载…</p>
+    </form>
+  </section>
+
+  <section id="landscape-gate" class="landscape-gate" hidden aria-label="横屏进入提示">
+    <div>
+      <b>请横置手机进入实训</b>
+      <p>系统已尝试自动切换横屏。若浏览器未允许，请横置手机后点击下方按钮。</p>
+      <button id="enter-landscape" type="button">横屏进入主界面</button>
+    </div>
+  </section>
+
+  <main class="training-app" aria-label="HXD1C两段制动对标停车虚拟实训" inert>
+    <section class="stage" id="stage">
+      <canvas id="route-scene" aria-label="终到站接车线路"></canvas>
+      <img id="cab-view" class="cab-view" src="./assets/archive-cabview/HXD1C_front.png" alt="HXD1C司机室">
+      <div id="cab-overlay" class="cab-overlay"></div>
+
+      <header class="toolbar">
+        <button type="button" id="callout" class="toolbar-button callout">呼唤确认</button>
+        <button type="button" id="progress-toggle" class="toolbar-button">过程记录 <b id="progress-count">0/12</b></button>
+        <button type="button" id="rules-toggle" class="toolbar-button">任务说明</button>
+        <button type="button" id="view-toggle" class="toolbar-button">视角</button>
+        <button type="button" id="mobile-operations-toggle" class="toolbar-button mobile-only" aria-expanded="false">操作</button>
+        <button type="button" id="fullscreen" class="toolbar-button icon-button" aria-label="全屏">⛶</button>
+      </header>
+
+      <section id="mobile-operations" class="mobile-operations" aria-label="手机操作台" aria-hidden="true">
+        <header><b>操作台</b><button type="button" data-mobile-close aria-label="关闭操作台">×</button></header>
+        <div class="mobile-control-row"><span>牵引／电制动 <b data-mobile-traction>牵引 4级 / 40 km/h</b></span><button type="button" data-mobile-command="traction-down">−</button><button type="button" data-mobile-command="traction-zero">0</button><button type="button" data-mobile-command="traction-up">＋</button></div>
+        <div class="mobile-control-row"><span>自阀 <b data-mobile-auto>运转位</b></span><button type="button" data-mobile-command="auto-down">−</button><button type="button" data-mobile-command="auto-up">＋</button></div>
+        <div class="mobile-control-row"><span>单阀 <b data-mobile-independent>缓解位</b></span><button type="button" data-mobile-command="independent-down">−</button><button type="button" data-mobile-command="independent-up">＋</button></div>
+        <div class="mobile-device-row"><button type="button" data-mobile-command="lkj">LKJ</button><button type="button" data-mobile-command="cir">CIR</button></div>
+      </section>
+
+      <nav id="view-menu" class="view-menu" aria-label="驾驶视角">
+        <button data-view="front" class="active">前方</button><button data-view="left">左侧</button><button data-view="right">右侧</button><button data-view="rearLeft">左后部瞭望</button><button data-view="rearRight">右后部瞭望</button>
+      </nav>
+
+      <aside id="progress-panel" class="side-panel" aria-hidden="true">
+        <div class="panel-head"><strong>过程记录</strong><button data-close-panel aria-label="关闭">×</button></div>
+        <p id="progress-panel-note">教学模式在关键节点冻结并讲解，不生成成绩。</p>
+        <ol id="progress-list"></ol>
+      </aside>
+
+      <aside id="rules-panel" class="side-panel rules-panel" aria-hidden="true">
+        <div class="panel-head"><strong>任务说明</strong><button data-close-panel aria-label="关闭">×</button></div>
+        <p><b>本工况：</b>平直站场、标准旅客列车、正线进站停车。进站信号显示一个黄灯；越过进站信号机后，LKJ左上角机车信号转为红黄灯。制动参数应结合贯通试验、编组和车底判断。</p>
+        <ul>
+          <li>贯通试验以自阀减压50 kPa后10秒内速度下降超过5 km/h作为标准制动力参考；本场景按标准制动力建模。</li>
+          <li>本场景站台约500 m，停车标位于站台内并距出站信号机约120 m；第一次制动距停车标约400 m，对应LKJ距出站约520 m。</li>
+          <li>第一次制动以约40 km/h、自阀初制位、约50 kPa减压开始，平稳降速；稳定降速约5秒后逐级退回牵引手柄至零位。</li>
+          <li>速度降至13–10 km/h、确认自阀排风停止后，将自阀移至运转位充风，再将主手柄置牵引1级，目标速度10 km/h。</li>
+          <li>列车管与列尾风压恢复后继续低速走行；第二次制动前必须在CIR中查询列尾风压，确认列尾不低于590 kPa且与机车列车管压差不超过20 kPa。</li>
+          <li>距停车标约20 m时主手柄回零，自阀再次置初制位形成约50 kPa减压，保持至停稳，不再缓解。</li>
+          <li>牵引列车使用自动制动停车；禁止用单阀、动力制动或惰行代替列车制动停车。</li>
+          <li>停车标与司机侧窗横向对齐时停稳；少量减压停车后，追加至减压100 kPa以上，单阀置全制动位。</li>
+          <li><b>考评要点：</b>进站速度不超过45 km/h、第一次制动地点正确、13–10 km/h缓解、充风完成、10 km/h低速走行、列尾查询、20 m第二次制动、停车误差不超过±0.5 m并完成防溜。</li>
+          <li>停车误差 ±2 m 内保留合格可能；越标 10 m 以上、停车标后仍以 3 km/h 以上运行、触发 LKJ 常用/紧急制动、运行中换向或停车后再次加载均为安全红线。</li>
+        </ul>
+      </aside>
+
+      <section id="training-guide" class="training-guide" aria-live="polite">
+        <div><span id="guide-signal-label">LKJ距进站</span><b id="guide-signal-remaining">500 m</b><small id="guide-remaining">距标 1376 m</small></div>
+        <div><span>参考</span><b id="guide-speed">40 km/h</b><small id="guide-band">37–43 km/h</small></div>
+        <p id="guide-hint">初减准备</p>
+      </section>
+
+      <div id="status-strip" class="status-strip" aria-live="polite">
+        <b id="mode-name">教学模式</b><span id="phase-name">进站确认</span><em id="status-message">监控正常</em>
+      </div>
+
+      <section id="lkj-dock" class="lkj-dock" aria-hidden="true">
+        <button type="button" class="lkj-close" data-lkj-close aria-label="关闭LKJ放大界面">×</button>
+        <div class="lkj-device">
+          <img class="lkj-native-base" src="./assets/lkj/native-states/main-blank.png" alt="LKJ2000监控装置">
+          <div class="lkj-screen"></div>
+          <div class="lkj-keypad"></div>
+        </div>
+      </section>
+
+      <section id="mode-picker" class="modal open">
+        <div class="picker-card">
+          <span class="eyebrow">HXD1C · 终到作业专项</span>
+          <h1>两段制动对标停车</h1>
+          <p>围绕“第一次制动、缓解充风、列尾查询、低速走行、第二次制动、侧窗对标”完成两段制动停车。本工况沿用大山铺站Ⅰ道、连续500 m站台与原站场环境。</p>
+          <div class="mode-grid">
+            <button type="button" data-mode="training"><b>教学模式</b><span>在第一次制动、缓解、充风、列尾查询、第二次制动和侧窗对标节点冻结讲解，不生成成绩。</span><em>进入教学</em></button>
+            <button type="button" data-mode="assessment"><b>考评模式</b><span>隐藏节点答案，由学生独立操纵，记录过程、停车误差和成绩。</span><em>开始考评</em></button>
+          </div>
+        </div>
+      </section>
+
+      <section id="route-loading" class="modal" aria-hidden="true" aria-live="polite">
+        <div class="loading-card">
+          <span class="loading-spinner" aria-hidden="true"></span>
+          <strong id="route-loading-title">正在加载终到站场</strong>
+          <p id="route-loading-message">正在读取原线路、站台和地形资源，加载完成后训练计时才会开始。</p>
+          <button type="button" id="route-loading-back" hidden>返回选择模式</button>
+        </div>
+      </section>
+
+      <section id="teaching-pause" class="modal teaching-pause" aria-hidden="true" aria-live="polite">
+        <div class="teaching-card">
+          <span class="eyebrow">教学节点 · 运行已冻结</span>
+          <h2 id="teaching-title">节点讲解</h2>
+          <p id="teaching-body"></p>
+          <strong id="teaching-focus"></strong>
+          <button id="teaching-continue" type="button">理解，继续运行</button>
+        </div>
+      </section>
+
+      <section id="result-modal" class="modal" aria-hidden="true">
+        <div class="result-card">
+          <span class="eyebrow">本轮结束</span>
+          <h2 id="result-title">训练结果</h2>
+          <div class="result-candidate">
+            <span>姓名 <b id="result-name">—</b></span>
+            <span>学号 <b id="result-student-id">—</b></span>
+            <span>开始时间 <b id="result-started-at">—</b></span>
+            <span>完成时间 <b id="result-finished-at">—</b></span>
+          </div>
+          <div class="result-score"><b id="result-score">0</b><span>分</span><em id="result-grade">—</em></div>
+          <p id="result-summary"></p>
+          <div id="result-categories" class="result-categories"></div>
+          <div id="result-curve" class="result-curve"></div>
+          <div class="result-actions"><button type="button" id="retry">再来一次</button><button type="button" id="choose-mode">选择模式</button><button type="button" id="change-candidate">更换学员</button></div>
+        </div>
+      </section>
+    </section>
+  </main>
+  <script type="module" src="./scripts/terminalStoppingApp.js?v=two-stage-2"></script>
+</body>
+</html>

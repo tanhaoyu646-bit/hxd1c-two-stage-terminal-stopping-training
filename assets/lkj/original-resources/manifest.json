@@ -1,0 +1,348 @@
+{
+  "source": "LKJ2000.exe",
+  "resources": [
+    {
+      "index": 1,
+      "name": "lkj-resource-01-63x55.png",
+      "width": 63,
+      "height": 55,
+      "sourceOffset": 390004
+    },
+    {
+      "index": 2,
+      "name": "lkj-resource-02-65x40.png",
+      "width": 65,
+      "height": 40,
+      "sourceOffset": 397038
+    },
+    {
+      "index": 3,
+      "name": "lkj-resource-03-65x40.png",
+      "width": 65,
+      "height": 40,
+      "sourceOffset": 402554
+    },
+    {
+      "index": 4,
+      "name": "lkj-resource-04-65x40.png",
+      "width": 65,
+      "height": 40,
+      "sourceOffset": 408085
+    },
+    {
+      "index": 5,
+      "name": "lkj-resource-05-65x40.png",
+      "width": 65,
+      "height": 40,
+      "sourceOffset": 411940
+    },
+    {
+      "index": 6,
+      "name": "lkj-resource-06-65x40.png",
+      "width": 65,
+      "height": 40,
+      "sourceOffset": 417628
+    },
+    {
+      "index": 7,
+      "name": "lkj-resource-07-65x40.png",
+      "width": 65,
+      "height": 40,
+      "sourceOffset": 421937
+    },
+    {
+      "index": 8,
+      "name": "lkj-resource-08-65x40.png",
+      "width": 65,
+      "height": 40,
+      "sourceOffset": 426555
+    },
+    {
+      "index": 9,
+      "name": "lkj-resource-09-65x40.png",
+      "width": 65,
+      "height": 40,
+      "sourceOffset": 431014
+    },
+    {
+      "index": 10,
+      "name": "lkj-resource-10-65x40.png",
+      "width": 65,
+      "height": 40,
+      "sourceOffset": 437639
+    },
+    {
+      "index": 11,
+      "name": "lkj-resource-11-65x40.png",
+      "width": 65,
+      "height": 40,
+      "sourceOffset": 441228
+    },
+    {
+      "index": 12,
+      "name": "lkj-resource-12-65x40.png",
+      "width": 65,
+      "height": 40,
+      "sourceOffset": 446573
+    },
+    {
+      "index": 13,
+      "name": "lkj-resource-13-65x40.png",
+      "width": 65,
+      "height": 40,
+      "sourceOffset": 450212
+    },
+    {
+      "index": 14,
+      "name": "lkj-resource-14-65x40.png",
+      "width": 65,
+      "height": 40,
+      "sourceOffset": 457191
+    },
+    {
+      "index": 15,
+      "name": "lkj-resource-15-65x40.png",
+      "width": 65,
+      "height": 40,
+      "sourceOffset": 461489
+    },
+    {
+      "index": 16,
+      "name": "lkj-resource-16-65x40.png",
+      "width": 65,
+      "height": 40,
+      "sourceOffset": 466064
+    },
+    {
+      "index": 17,
+      "name": "lkj-resource-17-65x40.png",
+      "width": 65,
+      "height": 40,
+      "sourceOffset": 472200
+    },
+    {
+      "index": 18,
+      "name": "lkj-resource-18-200x200.png",
+      "width": 200,
+      "height": 200,
+      "sourceOffset": 477406
+    },
+    {
+      "index": 19,
+      "name": "lkj-resource-19-65x40.png",
+      "width": 65,
+      "height": 40,
+      "sourceOffset": 478165
+    },
+    {
+      "index": 20,
+      "name": "lkj-resource-20-63x55.png",
+      "width": 63,
+      "height": 55,
+      "sourceOffset": 484148
+    },
+    {
+      "index": 21,
+      "name": "lkj-resource-21-65x40.png",
+      "width": 65,
+      "height": 40,
+      "sourceOffset": 488397
+    },
+    {
+      "index": 22,
+      "name": "lkj-resource-22-65x40.png",
+      "width": 65,
+      "height": 40,
+      "sourceOffset": 491986
+    },
+    {
+      "index": 23,
+      "name": "lkj-resource-23-65x40.png",
+      "width": 65,
+      "height": 40,
+      "sourceOffset": 498618
+    },
+    {
+      "index": 24,
+      "name": "lkj-resource-24-65x40.png",
+      "width": 65,
+      "height": 40,
+      "sourceOffset": 503218
+    },
+    {
+      "index": 25,
+      "name": "lkj-resource-25-65x40.png",
+      "width": 65,
+      "height": 40,
+      "sourceOffset": 508903
+    },
+    {
+      "index": 26,
+      "name": "lkj-resource-26-65x40.png",
+      "width": 65,
+      "height": 40,
+      "sourceOffset": 512536
+    },
+    {
+      "index": 27,
+      "name": "lkj-resource-27-200x200.png",
+      "width": 200,
+      "height": 200,
+      "sourceOffset": 518461
+    },
+    {
+      "index": 28,
+      "name": "lkj-resource-28-200x200.png",
+      "width": 200,
+      "height": 200,
+      "sourceOffset": 519078
+    },
+    {
+      "index": 29,
+      "name": "lkj-resource-29-65x40.png",
+      "width": 65,
+      "height": 40,
+      "sourceOffset": 519694
+    },
+    {
+      "index": 30,
+      "name": "lkj-resource-30-65x40.png",
+      "width": 65,
+      "height": 40,
+      "sourceOffset": 524717
+    },
+    {
+      "index": 31,
+      "name": "lkj-resource-31-65x40.png",
+      "width": 65,
+      "height": 40,
+      "sourceOffset": 530350
+    },
+    {
+      "index": 32,
+      "name": "lkj-resource-32-65x40.png",
+      "width": 65,
+      "height": 40,
+      "sourceOffset": 535609
+    },
+    {
+      "index": 33,
+      "name": "lkj-resource-33-65x40.png",
+      "width": 65,
+      "height": 40,
+      "sourceOffset": 541663
+    },
+    {
+      "index": 34,
+      "name": "lkj-resource-34-65x40.png",
+      "width": 65,
+      "height": 40,
+      "sourceOffset": 545426
+    },
+    {
+      "index": 35,
+      "name": "lkj-resource-35-65x40.png",
+      "width": 65,
+      "height": 40,
+      "sourceOffset": 551319
+    },
+    {
+      "index": 36,
+      "name": "lkj-resource-36-65x40.png",
+      "width": 65,
+      "height": 40,
+      "sourceOffset": 557474
+    },
+    {
+      "index": 37,
+      "name": "lkj-resource-37-65x40.png",
+      "width": 65,
+      "height": 40,
+      "sourceOffset": 563777
+    },
+    {
+      "index": 38,
+      "name": "lkj-resource-38-65x40.png",
+      "width": 65,
+      "height": 40,
+      "sourceOffset": 570201
+    },
+    {
+      "index": 39,
+      "name": "lkj-resource-39-60x59.png",
+      "width": 60,
+      "height": 59,
+      "sourceOffset": 576052
+    },
+    {
+      "index": 40,
+      "name": "lkj-resource-40-65x40.png",
+      "width": 65,
+      "height": 40,
+      "sourceOffset": 578242
+    },
+    {
+      "index": 41,
+      "name": "lkj-resource-41-65x40.png",
+      "width": 65,
+      "height": 40,
+      "sourceOffset": 584628
+    },
+    {
+      "index": 42,
+      "name": "lkj-resource-42-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sourceOffset": 588477
+    },
+    {
+      "index": 43,
+      "name": "lkj-resource-43-240x240.png",
+      "width": 240,
+      "height": 240,
+      "sourceOffset": 802749
+    },
+    {
+      "index": 44,
+      "name": "lkj-resource-44-200x200.png",
+      "width": 200,
+      "height": 200,
+      "sourceOffset": 810100
+    },
+    {
+      "index": 45,
+      "name": "lkj-resource-45-65x40.png",
+      "width": 65,
+      "height": 40,
+      "sourceOffset": 810748
+    },
+    {
+      "index": 46,
+      "name": "lkj-resource-46-65x40.png",
+      "width": 65,
+      "height": 40,
+      "sourceOffset": 817116
+    },
+    {
+      "index": 47,
+      "name": "lkj-resource-47-65x40.png",
+      "width": 65,
+      "height": 40,
+      "sourceOffset": 822788
+    },
+    {
+      "index": 48,
+      "name": "lkj-resource-48-65x40.png",
+      "width": 65,
+      "height": 40,
+      "sourceOffset": 828892
+    },
+    {
+      "index": 49,
+      "name": "lkj-resource-49-65x40.png",
+      "width": 65,
+      "height": 40,
+      "sourceOffset": 832646
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "format": "msts-track-path-v1",
+  "summary": {
+    "route": "JINGGUANG",
+    "source": "K527京广-本务.pat：株洲站1道起点后的实际控制点",
+    "direction": "ZHUZHOU station 1 to qidouchong",
+    "lengthMeters": 1012.1
+  },
+  "positions": [2.129, 0, -46.779, 12.605, 0, -668.858, 11.48, 0, -698.941, 11.934, 0, -708.93, 9.683, 0, -769.095, 10.138, 0, -779.084, 13.777, 0, -859.001, 20.602, 0, -1008.846]
+}

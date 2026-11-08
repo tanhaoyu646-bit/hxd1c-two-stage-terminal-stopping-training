@@ -1,0 +1,2575 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta lang="zh">
+        <title>CIR-simulator</title>
+        <link rel="stylesheet" href="./CSS/CIR-MMI-SIMULATOR.css">
+        <script>
+            // 浏览器会拒绝非用户手势触发的提示音；消化该拒绝，避免设备逻辑被未处理异常干扰。
+            (function () {
+                var media = window.HTMLMediaElement && window.HTMLMediaElement.prototype;
+                if (!media || media.__credentialSafePlay) return;
+                var originalPlay = media.play;
+                media.play = function () {
+                    var pending = originalPlay.apply(this, arguments);
+                    return pending && pending.catch ? pending.catch(function () {}) : pending;
+                };
+                media.__credentialSafePlay = true;
+            }());
+        </script>
+    </head>
+    
+    <body>
+        <div class = "mmi-body" id = "mmibody">
+            <div class = "mmi-left">
+                <div class = "mmi-name" id = "mmi-title">操作显示终端<input type="text" style = "background-color: black;color: white;" id = "mmijch"></div>
+                <div class = "mmi-mo">
+                    <div class = "mmi-screen" id = "mmiscreen"></div>
+                </div>
+                <div class = "mmi-button-tips"></div>
+                <div class = "mmi-buttom-button" id = "bottombutton">
+                    <button class = "bottom-button" id = "btbutton1" onclick = "buttonfix('bt1');"></button>
+                    <button class = "bottom-button" id = "btbutton2"  onclick = "buttonfix('bt2');"></button>
+                    <button class = "bottom-button" id = "btbutton3"  onclick = "buttonfix('bt3');"></button>
+                    <button class = "bottom-button" id = "btbutton4"  onclick = "buttonfix('bt4');"></button>
+                    <button class = "bottom-button" id = "btbutton5"  onclick = "buttonfix('bt5');"></button>
+                    <button class = "bottom-button" id = "btbutton6"  onclick = "buttonfix('bt6');"></button>
+                    <button class = "bottom-button" id = "btbutton7"  onclick = "buttonfix('bt7');"></button>
+                    <button class = "bottom-button" id = "btbutton8"  onclick = "buttonfix('bt8');"></button>
+                    <button class = "bottom-button" id = "btbutton9"  onclick = "buttonfix('bt9');"></button>
+                    <button class = "bottom-button" id = "btbutton10"  onclick = "buttonfix('bt10');"></button>
+                    <button class = "bottom-button" id = "btbutton11"  onclick = "buttonfix('bt11');"></button>
+                    <button class = "bottom-button" id = "btbutton12"  onclick = "buttonfix('bt12');"></button>
+                </div>
+            </div>
+
+            <div class = "mmi-right">
+                <div class = "mmi-right-button" id = "rightbutton">
+                    <button class = "right-button" id = "rtbutton1" onclick = "buttonfix('rt1')"></button>
+                    <button class = "right-button" id = "rtbutton2" onclick = "buttonfix('rt2')"></button>
+                    <button class = "right-button" id = "rtbutton3" onclick = "buttonfix('rt3')"></button>
+                    <button class = "right-button" id = "rtbutton4" onclick = "buttonfix('rt4')"></button>
+                    <button class = "right-button" id = "rtbutton5" onclick = "buttonfix('rt5')"></button>
+                    <button class = "right-button" id = "rtbutton6" onclick = "buttonfix('rt6')"></button>
+                    <button class = "right-button" id = "rtbutton7" onclick = "buttonfix('rt7')"></button>
+                    <button class = "right-button" id = "rtbutton8" onclick = "buttonfix('rt8')"></button>
+                    <button class = "right-button" id = "rtbutton9" onclick = "buttonfix('rt9')"></button>
+                    <button class = "right-button" id = "rtbutton10" onclick = "buttonfix('rt10')"></button>
+                    <button class = "right-button" id = "rtbutton11" onclick = "buttonfix('rt11')"></button>
+                    <button class = "right-button" id = "rtbutton12" onclick = "buttonfix('rt12')"></button>
+                    <button class = "right-button" id = "rtbutton13" onclick = "buttonfix('rt13')"></button>
+                    <button class = "right-button" id = "rtbutton14" onclick = "buttonfix('rt14')"></button>
+                    <button class = "right-button" id = "rtbutton15" onclick = "buttonfix('rt15')"></button>
+                    <button class = "right-button" id = "rtbutton16" onclick = "buttonfix('rt16')"></button>
+                    <button class = "right-button" id = "rtbutton17" onclick = "buttonfix('rt17')"></button>
+                    <button class = "right-button" id = "rtbutton18" onclick = "buttonfix('rt18')"></button>
+                    <button class = "right-button" id = "rtbutton19" onclick = "buttonfix('rt19')"></button>
+                    <button class = "right-button" id = "rtbutton20" onclick = "buttonfix('rt20')"></button>
+                    <button class = "right-button" id = "rtbutton21" onclick = "buttonfix('rt21')"></button>
+                    <button class = "right-button" id = "rtbutton22" onclick = "buttonfix('rt22')"></button>
+                    <button class = "right-button" id = "rtbutton23" onclick = "buttonfix('rt23')"></button>
+                    <button class = "right-button" id = "rtbutton24" onclick = "buttonfix('rt24')"></button>
+                    <button class = "right-button" id = "rtbutton25" onclick = "buttonfix('rt25')"></button>
+                    <button class = "right-button" id = "rtbutton26" onclick = "buttonfix('rt26')"></button>
+                    <button class = "right-button" id = "rtbutton27" onclick = "buttonfix('rt27')"></button>
+                    <button class = "right-button" id = "rtbutton28" onclick = "buttonfix('rt28')"></button>
+                    <button class = "right-button" id = "rtbutton29" onclick = "buttonfix('rt29')"></button>
+                    <button class = "right-button" id = "rtbutton30" onclick = "buttonfix('rt30')"></button>
+                    <button class = "right-button" id = "rtbutton31" onclick = "buttonfix('rt31')"></button>
+                    <button class = "right-button" id = "rtbutton32" onclick = "buttonfix('rt32')"></button>
+                </div>
+            </div>
+        </div>
+    </body>
+
+    <script>
+        var mmiheight = window.innerHeight;
+        var mmistate = 0;   //mmi状态，0副控，1主控
+        var netstate = 1;   //网络状态，0G网，1模拟
+        var pagecount = 0;
+        var currentpage = 0;
+        var segpagecount = 0;
+        var pagestep = 0;
+        var menuopcount = 1;
+        var infostate = 0;
+        var buttondowntime;
+        var timeout = 400;
+        var lwback = "";
+        var mmisound = new Audio();
+        var callmodefill = ["","调度","","","隧道司机","隧道车站","平原司机","平原车站","调度","","前站","车站","后站","车长","邻站组呼","站内组呼"];
+        const menufill = ["1、车次功能号注册","2、运行区段","3、查询通信录","4、扬声器音量调整","5、听筒音量调整","6、输入客车列尾装置ID",
+        "7、维护界面","8、状态查询","9、屏幕亮度调整","0、出入库检测","","[确认]确认，[回格]删除，[退出]返回"];
+        
+        const routechoosefill = ["线路选择：","1、自动","2、北京铁路局","3、济南铁路局","4、上海铁路局","5、兰州铁路局","6、西安铁路局","7、武汉铁路局","8、南昌铁路局","9、广铁集团公司","10、成都铁路局",
+        "11、哈尔滨铁路局","12、沈阳铁路局","13、青藏铁路公司","14、太原铁路局","15、南宁铁路局","16、昆明铁路局","17、呼和浩特铁路局","18、郑州铁路局","19、乌鲁木齐铁路局"];
+        
+        const lococode = ["001","解放","JF","133","工矿1","GK1","003","前进","QJ","134","工矿1F","GK1F","005","建设","JS","135","东风4(E)","DF4E","006","KD7","KD7","136","东风","7(D)","DF7D","101","东风","DF","137","工矿1(A)","GK1A","102","东风2","DF2","138","东风11","DF11","103",
+        "东风3","DF3","139","天安","TA","104","东风4","DF4","140","东风10(F)","DF10F","105","东风4(客)","DF4R","141","东风4(D)","DF4D","106","东风4(C)","DF4C","142","东风8(B)","DF8B","107","东风5","DF5","143","东风12","DF12","108","东风5(宽)","DF5R","149","新曙光","NDJ1","109","东风6",
+        "DF6","150","神州","NDJ2","110","东风7","DF7","201","8G","8G","111","东风8","DF8","202","8K","8K","112","东风9","DF9","203","6G","6G","113","东风10","DF10","204","6K","6K","114","东方红","1","DFH1","205","韶山1","SS1","115","东方红","2","DFH2","206","韶山3","SS3","116","东方红",
+        "3","DFH3","207","韶山4","SS4","117","东方红","5","DFH5","208","韶山5","SS5","118","北京","BJ","209","韶山6","SS6","119","北京(宽)","BJR","210","韶山3(G)","SS3G","120","ND2","ND2","211","韶山7","SS7","121","ND3","ND3","212","韶山8","SS8","122","ND4","ND4","213","韶山7B","SS7B",
+        "123","ND5","ND5","214","韶山7C","SS7C","124","NY5","NY5","215","韶山6B","SS6B","125","NY6","NY6","216","韶山9","SS9","126","NY7","NY7","217","韶山7D","SS7D","127","轻油","QY","218","熊猫","DJ","128","东方红21","DFH21","219","西门子车","DJ1","129","东风7(B)","DF7B","220","澳星（AC4000）",
+        "DJ2","130","东风5(口)S","DF5R0","221","中原之星","DJF","131","东风7(C)","DF7C","222","蓝剑","DJJ1","132","东风7(S)","DF7S","223","先锋","DJF","158","东方11G","DF11G","228","天梭","","224","韶7E","SS7E","151","GE","NJ2","225","韶山J3","SSJ3","080","东风7G","DF7G","226","韶山3C","SS3C",
+        "231","和谐D1","HXD1","301","CRH1","CRH1","232","和谐D2","HXD2","302","CRH2","CRH2","233","和谐D3","HXD3","303","CRH3","CRH3","234","和谐D1B","HXD1B","304","CRH4","CRH4","235","和谐D2B","HXD2B","305","CRH5","CRH5","236","和谐D3B","HXD3B","306","CRH380A","380A","237","和谐D1C","HXD1C",
+        "307","CRH380B","380B","238","和谐D2C","HXD2C","308","CRH380C","380C","239","和谐D3C","HXD3C","309","CRH380D","380D","160","和谐N3","HXN3","161","和谐N5","HXN5","242","和谐D3D","HXD3D"];
+
+        // mmi信息: 车次号，列尾号，机车号，风压，（4）调令信息函头长度，（24）调令信息提示
+        var mmiinfo = ["1","","","0600","5.5","13","26.5","15","37","12","29.5","21.5","35","19","79","9.5","15","12","32","3.7","3.7","8.2","3.7","3.7","第","","号","调度命令","","发令人:","","发令处所:","","发布时间：","","车次:","","机车号:","","共","","页 第","","页",""];
+        // 通信制式
+        
+
+        // 北京局线路、区段信息
+        const routeinfobeijing = ["京九上行","京九下行","津秦高铁","津秦高铁","津霸线","石太三线","石动走行","石太联络","石太客专","京广西联","京广高铁","京广高铁","京沪高铁","沈大高速","哈高速","京津城际",
+        "京动走行","石太上行","石太下行","津西走行","京津联络","津霸客专","霸徐线","霸徐京广","南仓联络","唐呼上行","唐呼下行","唐呼上行","唐呼下行","唐呼京通","唐呼京承","京哈唐呼","京包线","石济客专",
+        "德川东联","京哈唐呼","唐呼京通","唐呼京承","石太线","霸徐线","京广线","京沪线","京哈线","石太上行","石太下行","石德线","石德线","石德线","京通线","京通线","承隆线","大李线","大台线","丰沙线","丰双线",
+        "锦承线","锦承线","京包线","京包线","京承线","京原线","西北环线","东北环线","津霸联络","石德联线","邯长线","津蓟线","津山线","七滦线","天津北环","京九线","京九线","朔黄联络","南同蒲线","石太三线","邯黄线",
+        "邯黄线","北京直通","唐山北联","津霸线","唐呼上行","唐呼下行","石家庄直","石西北环","石德货联","石太引入","石西环线","VI频组","V频组","IV频组","III频组","I频组","VI频组","V频组","IV频组","III频组","I频组"];
+        
+
+        // 成都局线路、区段信息
+        const routeinfochengdu = ["成灌线","沪蓉线","沪蓉线","重庆动走","西成客专","西成客专","成贵客专","峨眉山线","成动走行","贵广客专","贵北动走","沪昆高速","沪昆高速","贵开线","贵阳枢纽","成渝高速","重北联络",
+        "兰渝线","湖雍线","郑渝高速","涪三线","万盛南联","三江东联","兰渝西成","渝贵线","成渝贵联","蔡歌联络","长东联络","成昆线","成昆线","涪三线","成都枢纽","湖雍线","重庆枢纽","兴隆场南","重庆机务","贵阳枢北",
+        "贵阳枢南","六盘水枢","宝成线","宝成线","宝成线","成昆线","成昆线","成昆线","川黔线","川黔线","成渝线","成渝线","成渝线","达成线","达成线","达成线","内昆线","内昆线","内昆线","内昆线","贵昆线","贵昆线",
+        "贵昆线","黔桂线","黔桂线","遂渝线","遂宁站","沪昆线","沪昆线","沪昆线","襄渝线","襄渝线","渝怀线","渝怀线","渝怀线","遂成线","水大线","广旺线","德天线","广岳线","成汶线","三万支线","安琪线","湖林线","开阳线","达万线","万利线","高南线","成都东环","出入库"];
+        
+
+        // 广州局线路、区段信息
+        const routeinfoguangzhou = ["广珠城际","广株线","广深 1-2","广深 3-4","京九上行","京九下行","京广高铁","京广高铁","海南东环","海南西段","广动基地","杭深线","杭深线","衡柳线","茂湛线","吉衡线","沪昆高速","沪昆高速","赣韶线","贵广客专","南广线","平湖联络","益湛线",
+        "广惠城际","广肇城际","长株潭线","石岗联络","京广线","京广线","沪昆线","沪昆线","沪昆线","京九线","京九线","漳龙线","漳龙线","益湛线","益湛线","益湛线","广深线","黄埔单线","广茂线","湛海线","畲汕单线","广茂联线","龙川北东","东莞东南","","湘黔线","湘黔线","湘黔线","渝怀线","渝怀线","渝怀线","焦柳线","焦柳线","","","","","","","","","","","","","","",""];
+        
+
+        // 呼和浩特局线路、区段信息
+        const routeinfohuhehaote = ["包西线","定银线","太中线","新陶线","呼动上行","呼动下行","响四线","高吴支线","临哈线","唐呼上行","唐呼下行","唐呼上行","唐呼下行","东铜线","唐呼京通","唐呼京承","京哈唐呼","京包线","京包客上","京包客下","京包客上","京包客下","中煤专线","呼鄂线","呼前联络","京哈唐呼","唐呼京通","唐呼京承","迁曹线","东铜线","唐呼上行","唐呼下行","临哈线",
+        "京包线","京包线","包兰线","包白线","包环线","郭查线","海公线","集二线","乌吉线","集通线","包石线","西金线","包神线","呼准线"];
+        
+
+        // 哈尔滨局线路、区段信息
+        const routeinfohaerbin = ["京哈线","拉滨线","通让线","平齐线","齐北线","齐北线","滨洲线","富嫩线","嫩林线","伊加线","牙林线","潮乌线","博林线","卓汇线","塔韩线","伊敏线","滨北线","福前线","绥佳线","汤林线","图佳线","哈齐客专@2","滨绥线","江北联络","王万线","壮让联络","王孙线","定一线","王岗疏解","榆树线@2","西昂线@2","榆红线@2","红峰疏解@2","红峰线@2","三榆线@2",
+        "西峰线@2","三峰线@2","昂峰疏解@2","呼工B线@2","阿扎线","哈局通用线路","京哈高速","沈大高速","齐北线","哈西联络","哈齐客专@1","滨绥线","齐南左线","齐南右线","滨州线","平齐线","齐北线","通让线","王万线","壮让联络","揄红线@1","三榆线@1","西昂线","榆树线@1","三峰线@1","红峰疏解@1","昂峰疏解@1","红峰线@1","西峰线@1","呼工B线@1","榆峰线"];
+        
+        
+        // 青藏公司线路、区段信息
+        const routeinfoqingzang = ["青藏线","拉日线","兰新客专","敦格线","兰青线","货车外绕","德令哈联","西宁动走","饮马疏解","饮西联络","青藏测试线","青藏线","兰青线","宁大线","柴达尔线","茶卡线","柴木线","双湟线"];
+        
+
+        // 济南局线路、区段信息
+        const routeinfojinan = ["胶济客专","胶济线","京沪高铁","京济联络","动车所线","济沪联络","胶荣联络","青烟直通","烟荣联络","京九上行","京九下行","海青线","瓦日线","台前联络","宁磁联络","德大线","德大疏解","徐州联络","青荣城际","辛泰线","磁东线","东莱线","东铁线","铁南线","胶辛联络","龙烟线","解港线","季港线","石济客专","齐河联络","京沪线","南北环线","胶济线","蓝烟线","究石线","新究线","胶新线","邯济线","京九线","京九线","京九客联",
+        "张东线","胶黄线","辛泰线","礠东线","东莱线","东平线","泰肥线","枣临线","薛枣线","张博线","博小线","桃威线","东铁线","南罗线","铁南线","坊子线","博八线","滋洪线","益羊线","临沐线","小沾线","德大线","史口联络","滨沾联络","滨小联络线","陇海线","陇海线","沂沭线","珠烟线","线路 0","线路 1","线路 2","线路 3","线路 4","线路 5","线路 6","线路 7","线路 8","线路 9"];
+        
+        //  昆明局线路、区段信息
+        const routeinfokunming = ["沪昆高速","沪昆高速","南昆客专","昆玉河线","沪昆动左","沪昆动右","云桂动左","云桂动右","昆阳线","成昆线","广昆复线","温桃联络","枢纽客线","枢纽货线","沪昆引入","沪昆客上","沪昆客下",
+        "昆玉河线","南昆线","沪昆线","成昆线","温桃联络","威红线","盘西线","水红线","广昆复线","广大线","大丽线","水红线","沪昆线","测试线路","安宁支线","测试线路 1","测试线路 2","测试线路 3","测试线路 4","测试线路 5","测试线路 6"];
+        
+        // 太原局线路、区段信息
+        const routeinfotaiyuan = ["大秦线","石太客专","太中线","北同蒲上","北同蒲下","迁曹线","司柏线","京唐港线","韩原线","大西线","大西动车","石太动车","大西高速","运城场左","运城场右","定银线","塔山线","包西线","电厂线","首钢工业","东港线","古大上行","古大下行","货联上行","货联下行","中鼎联络","侯西线","石太上行","石太下行","太兴上行","太兴下行","南同蒲线","榆联线","瓦日线","白北疏解","白文疏解","湖大线","魏瓦联络","东北联络","吕临线",
+        "北东联络","东南联络","吕临货联","吕临客联","汾太联络","皇太联络","汾皇联络","太岚线","西山线","兰村线","滦菱线","燕大上联","云岗上行","云岗下行","京包线","云岗大上","云岗大下","同蒲大上","同蒲大下","大包下发","大包上引","大同北环","曹西线","兴保线","秦东联络","侯西联络","义万疏解","侯西线","石太上行","石太下行","石德线","京包线","京包线","京原线","大秦线","大秦线","大秦线","大秦线","大秦线","北同蒲线","北同蒲线","包西线","南同蒲线",
+        "忻河线","包兰线","包兰线","高曲联线","侯月线","侯月线","介西线","介休洗选","口泉线","兰村线","礼垣线","宁苛线","太焦线","太焦线","西山线","薛梅线","白彪疏解","南金联络","小南联络","苛瓦线"];
+        
+
+        // 郑州局线路、区段信息
+        const routeinfozhengzhou = ["京九下行","京九上行","京广高铁","京广高铁","郑枢纽一","郑枢纽一","郑枢纽二","郑枢纽二","郑东走行","郑开城际","瓦日线","汤阴联络","郑焦城际","长子联络","汤鹤联络","郑机城际",
+        "郑机联络","宁西线","侯西线","徐兰高速","徐兰高速","南东联络","北西联络","西北联络","西南联络","北东联络","徐兰联络","侯西线","站内调车","京广线","东陇海线","东陇海线","西陇海","新菏线","新菏线",
+        "北焦枝线","南焦枝线","宁西线","宁西线","侯月线","漯宝线","洛宜线","太焦线","焦柳线","孟宝线","新月线","京九线","京九线","石德线","南金联络","小南联络"];
+        
+
+        //  兰州局线路、区段信息
+        const routeinfolanzhou = ["兰新客专","徐兰高速","陇海线","兰动走行","太中线,定银线","中川线","敦煌线","兰渝线","兰渝线","中马线","中川货联","兰枢环线","干武线","包兰线","包兰线","兰州北环","包兰线","陇海线",
+        "兰新线","兰青线","宝中线","干武线","平汝线","红会线","嘉镜线","玉门南线","西平线","嘉绿联络","水大联络","兰州北环","嘉南联络","东川货场","天华线","库检测试","太古铁路","频点一","频点二","频点三","频点四","频点五","频点六","频点七","模式一","模式二"];
+        
+
+        //  南宁局线路、区段信息
+        const routeinfonanning = ["焦柳线","河茂线","黎湛线","湘桂线","南宁南环","南昆线","南昆线","南昆线","黔桂线","黔桂线","益湛线","益湛线","青鹧线贵阳枢纽","贵阳枢纽","衡柳线","黎河联络","黎钦线","邕北线","钦防线","衡柳线","柳南客专","湘桂线","屯里动所",
+        "南广线","青鹧联络","柳广联络","贵广客专","桂北定线","桂西联络","南昆客专","黎湛线","黎塘疏II","湘桂上行","湘桂下行","桂林动所","南宁南环","河茂线","黎河联络"];
+        
+
+        //  武汉局线路、区段信息
+        const routeinfowuhan = ["沪蓉线","沪蓉线","沪蓉线","沪蓉线","沪蓉线","仙宁线","合肥新客","合武绕行","京九上行","京九下行","武九线","京广高铁","京广高铁","麻武线","余花联络","武咸城际","武九客专","武九客专","武冈城际","宁西线","武孝城际","沪蓉线",
+        "武石城际","京九线","京九线","京广线","汉丹线","武九货线","宁西线","宁西线","焦柳线","长荆线","襄渝线","南焦枝线","北焦枝线","侯月线","孟宝线","鸦宜线","西陇海","西陇海","东陇海","万利线","麻武线","漯阜线","小厉线"];
+        
+
+        //  西安局线路、区段信息
+        const routeinfoxian = ["大西高速","徐兰高速","徐兰高速","太中线","定银线","动车走行","包西线","集包上行","集包下行","黄韩侯","侯西线","宁西线","兰渝线","郑西西联","神大线","西成客专","西成客专","西成联络","宁西线","侯西线","西康线","襄渝线",
+        "襄渝线","西陇海","宝成线","宝成线","宝成线","宝兰线","宁西线","宝中线","阳安线","东陇海线","东陇海线","京广线","京广线","西韩线","西韩线","包兰线","包西线","咸铜线","韩侯线","甘钟线","咸铜线","焦柳线","西平线","西平线","神大线","神朔线","南金联络","小南联络"];
+        
+        
+        // 沈阳局线路、区段信息
+        const routeinfoshenyang = ["京哈线","沈局线路","京哈线","京哈线","长西联络","哈长联络","长珲城际","京哈高速","沈大高速","丹大线","沈丹客专","连北入所","连北出所","沈北入所","沈北出所","长西入所","长西出所","沈南入所","沈南出所","沈皇高联","沈皇普联","北皇联络","盘营高速",
+        "中海联络","哈西联络","前阳联络","同金联络","沈丹疏解","双白线","高新线","大郑线","通霍线","平齐线","通让线","北西联络","北南联络","南环二线","京通线","新立屯联","长白线","白阿线","长春北站","大安联络","大安西联","穆白联络","致白联络"];
+        
+        
+        //  上海局线路、区段信息
+        const routeinfoshanghai = ["沪宁城际","虹桥联络","沪昆高速","沪昆高速","笕杭线","笕杭线","杭深线","杭深线","宁杭高速","杭甬客专","宁杭联络","京沪高铁","徐州联络","仙宁线","沪蓉线","沪蓉线","沪蓉线","沪蓉线","沪蓉线","合宁绕行","合肥新客","合武绕行","合福绕行","宁安客专","铜陵北联",
+        "金温线","金华南联","永全线","合蚌客专","蚌南联络","京九上行","京九下行","阜六上行","阜六下行","宁西线","宁启线","徐兰高速","徐兰高速","陇海线","京沪线","淮南上行","淮南下行","衢九线","淮萧联络","符夹线","沪昆线","杭动走线","徐动车线","安庆线","南动车线","塘雅联络","京沪线","沪昆线",
+        "沪昆线","陇海线","京九线","京九线","宿淮线","铜九线","萧甬线","安庆线","白沙线","北仑线","北杨线","长牛线","大洛线","符夹线","丰沛线","阜淮线","海洋线","合肥绕行","合肥新客","合九线","合武绕行","何杨线","沪春线","沪昆绕行","淮南线","淮南绕行","淮田线","黄封线","夹北线","觅杭线","金千线",
+        "金山线","金温货线","林浦线","轮北线","轮南线","南何线","南何立交","宁波北环","宁启 A 线","宁芜线","宁西线","浦东线","前贾线","青阜线","衢常线","水蚌线","淞沪线","桃东线","皖赣线","吴泾线","芜铜线","西张线","萧萧联络","新长线","新龙华联络","新闵线","宣杭线","宣杭老线","杨万线","尧栖线","永利线","永全线","镇大支线","朱锡北联络","","","","","",""];
+        
+        
+        //  乌局线路、区段信息
+        const routeinfowulumuqi = ["兰新客专","兰动走行","兰新线","大河沿上","大河沿下","大河沿上","大河沿下","乌西外包","乌将线","淮东线","奎北线","北阿线","精霍线","芦草沟线","六道湾线","石化线","苇湖梁线","天业线","奎西专用","克石专用","可利煤专","临哈线","临哈线临哈疏解","哈密联络","红光线","哈密西线","哈罗线","哈罗疏解","罗钾专用","合普物流","花园子专","南疆线","库尔勒外","库俄线","鱼焉线","红岭线"];
+       
+
+        //  南昌局线路、区段信息
+        const routeinfonanchang = ["东吴支线","沪昆高速","沪昆高速","昌福线","南昌西环","永莆线","杭深线","杭深线","鹰厦","京九上行","京九下行","昌九城际","龙漳线","武九线","福州联络","万能联络","吉衡线","赣韶线","合福高速","可门支线","赣瑞龙线","江阴港支","福南动走","厦北动联","武九客专","武九客专","九江联络","赣九线","景西联络","景东联络","万能线","京九线","京九线",
+        "外南线","沪昆线","鹰厦线","福马线","峰福线","赣龙线","来外II线","来舟外IV","厦西联络","永嘉支线","漳龙线","漳泉线","漳州支线","武九线","皖赣线","戈樟线","上饶联络","乐德线","沙浔线","向乐线","张德线","张建线","分文线","泉高线","发西线","西到线","醴茶线","吉井线","皖赣联络","鹰夏联络","铜九疏解","湖口疏解","合九线","铜九线","萍乡联甲","萍乡联乙","鹰潭环到","鹰潭反发",
+        "向东 A1","向东 A1","向东 A3","向东 B3","向东 D 线","向东 B2","向东 E 线","向东 E2","向东 F 线","向东 L2","向东 L3","向东 L4","向东 L5","向东 L6","向塘 L7","向东 R 环","向塘 XI 道","南平东支","武九货线","抚乐线"];
+        
+        // 集通铁路线路、区段信息
+        const routeinfojitong = ["集通线","锡多线","锡乌线","锡二线","集包上行","集包下行"];
+        
+
+        // 神朔铁路线路、区段信息
+        const routeinfoshenshuo = ["神朔铁路","包神铁路","机务段","朔黄铁路"];
+       
+        
+
+        var weihufill = ["维护界面：&nbsp&nbsp&nbsp&nbsp1/3","1、机车号：21100082","2、路局APN：GRIS.NN","3、主用GROS IP：114.514.0.1","4、备用GROS IP：114.514.19.19","5、归属GRIS IP：114.514.1.1",
+        "6、修改密码：123456","7、库检一电话：","8、库检二电话：","9、库检三电话：","0、库检一IP：","维护界面：            2/3","1、库检二IP：","2、库检三IP：","3、MMI上电后的状态：主控","4、软件版本号查询：",
+        "5、系统校时：","6、呼叫转移","7、添加机车类型","8、450MHz单元参数设置","9、800MHz单元参数设置","0、450MHz列尾类型：标准","维护界面：模块配置            3/3",
+        "1、GSM-R语音单元：已配置","2、数据主控程序版本：已配置","3、卫星定位单元：未配置","4、机车数据采集编码器：已配置","5、450通用机车电台：已配置","6、记录单元：已配置","7、MMI状态：双置","8、电池单元：已配置",
+        "9、车次号机车号检测状态：根据实际情况发送"," "];
+        var versionfill = ["版本号查询：","1、语音主控程序版本：V2.0.A 11/07/11","2、数据主控程序版本：V2.0.A 11/06/22","3、主控单元程序版本： V2.0.2 10/11/25",
+        "4、GPS单元程序版本： V2.0.9 11/07/08","5、450M单元程序版本： V2.0.B 11/06/30","6、记录单元软件版本： V1.0.3 10/11/16","7、LBJ单元软件版本： V9.9.6 99/99/99","8、MMI程序版本： V2.0.A 11/07/11"];
+        var stateinfofill = ["状态查询：","1、GSM-R语音接收电平：-65 dBm","2、GSM-R数据接收电平：-65 dBm","3、主机系统时间：","4、记录单元时间：","5、当前GRIS IP：114.514.0.1","6、本机IP：127.0.0.1","7、列尾IP：0.0.0.0",
+        "8、卫星定位单元：正常","9、卫星定位信息：无效","10、电池状态：正常(12.82V)"];
+        var checkselffill = ["1、自检","2、GPRS数据","3、450MHz数据","4、450MHz同频通话","5、450MHz异频通话","6、GSM-R通话","7、记录单元测试","8、退出库检状态","1、GSM-RXX单元模块工作状态  （✔）","2、GSM-R通用数据单元模块工作状态  （✔）",
+        "3、卫星定位单元    （✔）","4、车次号数据采集单元  （✔）","5、450M功能模块  （✔）","6、800M功能模块  （✔）","7、记录单元  （✔）","8、MMI操作终端  （✔）","9、电池  （✔）","\"✔\"为检测成功，\"×\"为检测失败，\"—\"为表示未配置",
+        "999000"];
+        var infosave = [0,2,5,7,9,11,13,15,17,19];
+        
+        //  body init
+        document.getElementById("mmibody").style.height = Math.floor(mmiheight);
+        document.getElementById("mmibody").style.width = Math.floor(mmiheight * 1.53);
+
+        //  left button init
+        for(var i = 1;i <= 12;i++)
+        {
+            //var btbutton = document.createElement("button");
+            //document.getElementById("bottombutton").appendChild(btbutton);
+            //btbutton.className = "bottom-button";
+            //btbutton.id = "btbutton"+i;
+
+            if(i < 8 || i > 9) 
+                document.getElementById("btbutton"+i).style.marginRight = "4.3%";
+            else if(i == 9)
+            {
+                document.getElementById("btbutton"+i).style.marginLeft = "44%";
+                document.getElementById("btbutton"+i).style.marginRight = "11.5%";
+            }
+            if(i == 12)
+                document.getElementById("btbutton"+i).style.marginRight = "0%";
+            if(i >= 9)
+            {
+                document.getElementById("btbutton"+i).style.backgroundImage = "url('./IMAGE/bttext" + i.toString() + ".png')";
+            }
+
+        }
+
+        //  right button init
+        var warnnum = 1;
+        for(var i = 1;i <= 32;i++)
+        {
+            //var btbutton = document.createElement("button");
+            //document.getElementById("rightbutton").appendChild(btbutton);
+            //btbutton.className = "right-button";
+            //btbutton.id = "rtbutton"+i;
+
+            if(i == warnnum)
+            {
+                document.getElementById("rtbutton"+i).style.marginRight = "11%";
+                warnnum += 4;
+            }
+            else
+            {
+                document.getElementById("rtbutton"+i).style.marginRight = "5%";
+            }
+
+            if(i != 13)
+            {
+                document.getElementById("rtbutton"+i).style.backgroundImage = "url('./IMAGE/rttext" + i.toString() + ".png')";
+            }
+
+        }
+
+        maininterfaceinit();
+
+        
+
+        window.open('./cirinfotxtest.html', '_blank', 'width=380,height=650,left=100,top=100,resizable=no,scrollbars=no,toolbar=no,menubar=no,location=no,status=no');
+        //  left - offset screen lefttop
+        //  top - offset screen top
+        //  resizable - allow user change window size
+        //  scrollbar - show scrollbar
+        //  toolbar - show bowser toolbar
+        //  menubar - show bowser menubar
+        //  location - show address box
+        //  status - show state box
+
+        // 1. 创建广播通道，名称必须与 Page B 一致
+        const channel = new BroadcastChannel('my_communication_channel');
+
+        // 2. 监听消息
+        channel.onmessage = (event) => {
+            const data = event.data;
+            var atcount = 1;
+            var datacount = 1;
+            var datatmp = "";
+            //addLog(`收到原始数据: ${data}`);
+            //alert("收到原始数据："+data);
+
+            if (typeof data === 'string') {
+                // 核心需求：接收后通过 alert 显示
+                //alert(`页面 A 收到消息:\n"${data}"`);
+                if(data.slice(0,4) == "ddml")
+                    getinfomationwin("ddml");
+                else if(data.slice(0,4) == "jlyg")
+                    getinfomationwin("jlyg");
+                else if(data.slice(0,4) == "ldqr")
+                {
+                    
+                    document.getElementById("lwstate").innerHTML = "待确认";
+                    document.getElementById("call2").innerHTML = data.slice(5,11) + "号尾部装置等待确认";
+                    setTimeout(() => {
+                        readnumber(data.slice(5,6));
+                    }, 400);
+                    setTimeout(() => {
+                        readnumber(data.slice(6,7));
+                    }, 800);
+                    setTimeout(() => {
+                        readnumber(data.slice(7,8));
+                    }, 1200);
+                    setTimeout(() => {
+                        readnumber(data.slice(8,9));
+                    }, 1600);
+                    setTimeout(() => {
+                        readnumber(data.slice(9,10));
+                    }, 2000);
+                    setTimeout(() => {
+                        readnumber(data.slice(10,11));
+                    }, 2400);
+                    setTimeout(() => {
+                        mmisound.src = "./sound/列尾装置.wav";
+                        mmisound.play();
+                    }, 2800);
+                    setTimeout(() => {
+                        mmisound.src = "./sound/等待确认.wav";
+                        mmisound.play();
+                        mmistate = 1;
+                    }, 3800);
+                }
+                else if(data.slice(0,4) == "ldld")
+                {
+                    document.getElementById("lwstate").innerHTML = "电压不足";
+                    document.getElementById("call2").innerHTML = data.slice(5,11) + "号尾部装置电量不足";
+                    document.getElementById("lwstate").style.color = "red";
+                    setTimeout(() => {
+                        readnumber(mmiinfo[2].slice(1,2));
+                    }, 400);
+                    setTimeout(() => {
+                        readnumber(mmiinfo[2].slice(2,3));
+                    }, 800);
+                    setTimeout(() => {
+                        readnumber(mmiinfo[2].slice(3,4));
+                    }, 1200);
+                    setTimeout(() => {
+                        readnumber(mmiinfo[2].slice(4,5));
+                    }, 1600);
+                    setTimeout(() => {
+                        mmisound.src = "./sound/机车.wav";
+                        mmisound.play();
+                    }, 2000);
+                    setTimeout(() => {
+                        mmisound.src = "./sound/列尾装置.wav";
+                        mmisound.play();
+                    }, 2600);
+                    setTimeout(() => {
+                        mmisound.src = "./sound/电压不足.wav";
+                        mmisound.play();
+                        document.getElementById("call2").innerHTML = "";
+                        mmistate = 1;
+                    }, 3600);
+
+                }
+
+                console.log(data);
+
+                for(var i = 5;i < data.length;i++)
+                {
+                    if(data.slice(i,i+1) != "@")
+                    {
+                        if(datacount == 1)
+                            document.getElementById("infotext2").innerHTML += data.slice(i,i+1);
+                        else if(datacount == 2)
+                            document.getElementById("infotext7").innerHTML += data.slice(i,i+1);
+                        else if(datacount == 3)
+                            document.getElementById("infotext9").innerHTML += data.slice(i,i+1);
+                        else if(datacount == 4)
+                            document.getElementById("infotext11").innerHTML += data.slice(i,i+1);
+                        else if(datacount == 5)
+                            document.getElementById("infotext13").innerHTML += data.slice(i,i+1);
+                        else
+                            document.getElementById("infobox2").innerHTML += data.slice(i,i+1);   
+                    }
+                    else
+                    {
+                        atcount += 1;
+                        datacount += 1;
+                    }
+                }
+
+                document.getElementById("infobox2").innerHTML += "\n\n测接收时间：" + getcircurrenttime(2) + "\n接收地点：公里标9999.9";  
+            }
+        };
+
+        // 页面关闭时清理通道
+        window.addEventListener('beforeunload', () => {
+            channel.close();
+        });
+
+        //alert(seginfobeijing[0].slice(0,seginfobeijing[0].length));
+        //getinfomationwin("ddml");
+        //getinfomationwin("jlyg");
+        //drawmenu();
+        //------------------ function ------------------------
+
+        //  draw main menu
+        function drawmenu()
+        {
+            var mmimenu = document.createElement("div");
+            document.getElementById("mmiscreen").appendChild(mmimenu);
+            mmimenu.className = "mmi-menu";
+            mmimenu.id = "mmimenu";
+            mmimenu.style.fontSize = mmiheight * 0.025;
+
+            if(mmiinfo[0] != "1")
+                menufill[0] = "1、车次功能号注销";
+            else
+                menufill[0] = "1、车次功能号注册";
+
+            for(var i = 1;i <= 12;i++)
+            {
+                var menuoption = document.createElement("div");
+                mmimenu.appendChild(menuoption);
+                menuoption.className = "menu-option";
+                menuoption.id = "menuoption"+i;
+                menuoption.innerHTML = menufill[i-1];
+
+                if(i > 10)
+                {
+                    menuoption.style.backgroundColor = "black";
+                    menuoption.style.color = "#00ecec";
+                }
+
+            }
+
+            document.getElementById("menuoption12").style.display = "flex";
+            document.getElementById("menuoption12").style.justifyContent = "center";
+            document.getElementById("menuoption1").style.backgroundColor = "#01fe00";
+            document.getElementById("menuoption1").style.color = "white";
+            mmistate = 20;
+
+            
+        }
+
+        // menu option light
+        function menuoptionlight(key_type)
+        {
+
+            if(key_type == "down")
+            {
+                if(mmistate == 20)      // main menu option choose
+                {
+                    //console.log(menuopcount);
+                    if(menuopcount > 1 && menuopcount <= 11)
+                    {
+                        document.getElementById("menuoption"+(menuopcount-1)).style.backgroundColor = "#0000cc";
+                        document.getElementById("menuoption"+(menuopcount-1)).style.color = "yellow";
+                        if(menuopcount == 11)
+                            menuopcount = 1;
+                    }
+                }
+                else if(mmistate == 220 || Math.floor(mmistate / 100)== 22 || mmistate == 2700)     // 运行区段选项
+                {
+                    if(menuopcount > 1 && menuopcount <= 12)
+                    {
+                        document.getElementById("menuoption"+(menuopcount-1)).style.backgroundColor = "#0000cc";
+                        document.getElementById("menuoption"+(menuopcount-1)).style.color = "yellow";
+                        if(menuopcount == 12)
+                            menuopcount = 2;
+                    }
+                }
+                else if(mmistate == 300)     //  出入库检测选项
+                {
+                    if(menuopcount >= 1 && menuopcount <= 8)
+                    {
+                        document.getElementById("menuoption"+(menuopcount-1)).style.backgroundColor = "#0000cc";
+                        document.getElementById("menuoption"+(menuopcount-1)).style.color = "yellow";
+                        if(menuopcount == 8)
+                            menuopcount == 1;
+                    }
+                }
+            }
+            else if(key_type == "up")
+            {
+                if(mmistate == 20)
+                {
+                    if(menuopcount > 1 && menuopcount < 10)
+                    {
+                        document.getElementById("menuoption"+(menuopcount+1)).style.backgroundColor = "#0000cc";
+                        document.getElementById("menuoption"+(menuopcount+1)).style.color = "yellow";
+                    }
+                    else if(menuopcount == 1 || menuopcount == 10)
+                    {
+                        document.getElementById("menuoption"+menuopcount).style.backgroundColor = "#0000cc";
+                        document.getElementById("menuoption"+menuopcount).style.color = "yellow";
+                    }
+                }
+                else if(mmistate == 220 || Math.floor(mmistate / 100)== 22 || mmistate == 2700)     // 运行区段选项
+                {
+                    if(menuopcount >= 1 && menuopcount <= 12)
+                    {
+                        document.getElementById("menuoption"+(menuopcount+1)).style.backgroundColor = "#0000cc";
+                        document.getElementById("menuoption"+(menuopcount+1)).style.color = "yellow";
+                        if(menuopcount == 1)
+                            menuopcount = 11;
+                    }
+                }
+                else if(mmistate == 300)     //  出入库检测选项
+                {
+                    if(menuopcount >= 1 && menuopcount <= 8)
+                    {
+                        document.getElementById("menuoption"+(menuopcount+1)).style.backgroundColor = "#0000cc";
+                        document.getElementById("menuoption"+(menuopcount+1)).style.color = "yellow";
+                        if(menuopcount == 1)
+                            menuopcount == 8;
+                    }
+                }
+            }
+            
+
+                document.getElementById("menuoption"+menuopcount).style.backgroundColor = "#01fe00";
+                document.getElementById("menuoption"+menuopcount).style.color = "white";
+                //console.log(menuopcount);
+            
+        }
+
+        //  draw rxinfomation window
+        function getinfomationwin(info_type)
+        {
+            var infowin = document.createElement("div");
+            document.getElementById("mmiscreen").appendChild(infowin);
+            infowin.className = "mmi-menu";
+            infowin.id = "infowin";
+            
+            for(var i = 1;i <= 2;i++)
+            {
+                var infobox = document.createElement("div");
+                document.getElementById("infowin").appendChild(infobox);
+                infobox.className = "infomation-box";
+                if(i == 2)
+                    infobox.className = "infomation-box1";
+                infobox.id = "infobox"+i;
+            }
+
+            for(var i = 1;i <= 20;i++)
+            {
+                var infotext = document.createElement("div");
+                document.getElementById("infobox1").appendChild(infotext);
+                infotext.style.width = mmiinfo[i+3] + "%";
+                infotext.innerHTML = mmiinfo[i+23];
+                infotext.style.height = "20%";
+                infotext.id = "infotext"+i;
+                if(i == 2 || i % 2 != 0)
+                    infotext.style.color = "rgb(0,253,0)";
+                else
+                    infotext.style.color = "white";
+                if(i == 13 || i == 15)
+                    infotext.style.color = "red";
+                //
+            }
+            document.getElementById("infotext1").style.color = document.getElementById("infotext3").style.color = "white";
+            document.getElementById("infotext13").style.color = document.getElementById("infotext15").style.color = "red";
+
+            if(info_type == "ddml")
+            {
+                document.getElementById("infobox2").style.backgroundColor = "rgb(131,64,0)";
+                mmisound.src = "./sound/ddmlqs.wav";
+                mmisound.play();
+                document.getElementById("infotext15").innerHTML = document.getElementById("loconum").innerText + "(本务机)";
+                document.getElementById("infotext15").style.color = "red";
+                mmistate = 31;
+            }
+                
+            else if(info_type == "jlyg")
+            {
+                document.getElementById("infobox2").style.backgroundColor = "rgb(253,0,253)";
+                document.getElementById("infotext4").innerHTML = "";
+                document.getElementById("infotext5").innerHTML = "列车接车进路预告信息";
+                document.getElementById("infotext5").style.color = "black";
+                document.getElementById("infotext15").innerHTML = document.getElementById("loconum").innerText + "(本务机)";
+                document.getElementById("infotext15").style.color = "red";
+                mmisound.src = "./sound/jlyg.wav";
+                mmisound.play();
+                mmistate = 32;
+            }
+
+            else if(info_type == "crkjc")
+            {
+                document.getElementById("infobox2").style.backgroundColor = "rgb(131,64,0)";
+                document.getElementById("infotext4").innerHTML = "";
+                checkselffill[18] =  (parseInt(checkselffill[18]) + 1).toString();
+                document.getElementById("infotext2").innerHTML = checkselffill[18];
+                document.getElementById("infotext5").style.color = "white";
+                document.getElementById("infotext5").innerHTML = "出入库检测";
+                document.getElementById("infotext7").innerHTML = "柳州测试";
+                document.getElementById("infotext9").innerHTML = "柳州检测";
+                document.getElementById("infotext11").innerHTML = getcircurrenttime(1);
+                document.getElementById("infotext13").innerHTML = document.getElementById("traincode").innerText;
+                document.getElementById("infotext15").innerHTML = document.getElementById("loconum").innerText;
+                mmisound.src = "./sound/出入库检测.wav";
+                mmisound.play();
+                setTimeout(() => {
+                    mmisound.src = "./sound/请签收.wav";
+                    mmisound.play();
+                }, 1300);
+                
+                if(menuopcount == 2)
+                    document.getElementById("infobox2").innerHTML = "GPRS数据出入库检测\n" + "测接收时间：" + getcircurrenttime(2) + "\n接收地点：公里标9999.9";
+                else
+                    document.getElementById("infobox2").innerHTML = "450M数据出入库检测\n" + "测接收时间：" + getcircurrenttime(2) + "\n接收地点：公里标9999.9";
+                
+                //mmistate = 33;
+            }
+                
+                
+            document.getElementById("infobox2").style.height = "72%";
+            mmistate = 31;
+        }
+
+        // draw command window
+        function drawcommandwindow()
+        {
+            var cmdwin = document.createElement("div");
+            document.getElementById("mmiscreen").appendChild(cmdwin);
+            cmdwin.className = "mmi-menu";
+            cmdwin.id = "cmdwindow";
+
+            for(var i = 1;i <= 2;i++)
+            {
+                var infobox = document.createElement("div");
+                cmdwin.appendChild(infobox);
+                infobox.className = "infomation-box";
+                infobox.id = "infomationnox"+i;
+            }
+
+            
+
+        }
+
+        //  button judge then call some function
+        function buttonfix(button_code)
+        {
+            mmisound.src = "./sound/mmi-du.wav";
+            mmisound.play();
+
+            switch(button_code)
+            {
+                // judge left button
+                case "bt1":     //  left1
+                    if(netstate == 0)
+                        document.getElementById("call2").innerHTML = "正在呼叫调度员...";
+                break;
+                case "bt2":     //  left2
+                    if(netstate == 1)
+                        document.getElementById("call2").innerHTML = "正在呼叫调度员...";
+                break;
+                case "bt3":     //  left3
+                    if(netstate == 0)
+                        document.getElementById("call2").innerHTML = "正在呼叫前站车站值班员...";
+                break;
+                case "bt4":     //  left4
+                    if(netstate == 0)
+                        document.getElementById("call2").innerHTML = "正在呼叫车站值班员...";
+                break;
+                case "bt5":     //  left5
+                    if(netstate == 0)
+                        document.getElementById("call2").innerHTML = "正在呼叫后站车站值班员...";
+                    else
+                    {
+                        document.getElementById("call2").innerHTML = "正在呼叫隧道司机...";
+                        document.getElementById("call1").style.backgroundImage = "url('./IMAGE/led-analog-tx.png')";
+                        mmisound.src = "./sound/call-jc.wav";
+                        mmisound.play();
+                        setTimeout(() => {
+                            document.getElementById("call1").style.backgroundImage = "url('./IMAGE/led-analog-rx.png')";
+                            document.getElementById("call2").innerHTML = "↙隧道司机";
+                            document.getElementById("call2").style.color = "lightgreen";
+                            setTimeout(() => {
+                                document.getElementById("call1").style.backgroundImage = "url('./IMAGE/led-analog-default.png')";
+                                document.getElementById("call2").innerHTML = "↗隧道司机";
+                            }, 1000);
+                        }, 3000);
+                    }
+                        
+                break;
+                case "bt6":     //  left6
+                    if(netstate == 0)
+                        document.getElementById("call2").innerHTML = "正在呼叫" + mmiinfo[0] + "次车长...";
+                    else
+                    {
+                        document.getElementById("call2").innerHTML = "正在呼叫隧道车站...";
+                        document.getElementById("call1").style.backgroundImage = "url('./IMAGE/led-analog-tx.png')";
+                        
+                        setTimeout(() => {
+                            document.getElementById("call1").style.backgroundImage = "url('./IMAGE/led-analog-rx.png')";
+                            mmisound.src = "./sound/backling.wav";
+                            mmisound.play();
+                            document.getElementById("call2").innerHTML = "↙隧道车站";
+                            document.getElementById("call2").style.color = "lightgreen";
+                            setTimeout(() => {
+                                document.getElementById("call1").style.backgroundImage = "url('./IMAGE/led-analog-default.png')";
+                                document.getElementById("call2").innerHTML = "↗隧道车站";
+                            }, 1000);
+                        }, 3000);
+                    }
+                break;
+                case "bt7":
+                    if(netstate == 0)
+                        document.getElementById("call2").innerHTML = "正在呼叫邻站组呼...";
+                    else
+                    {
+                        document.getElementById("call2").innerHTML = "正在呼叫平原司机...";
+                        document.getElementById("call1").style.backgroundImage = "url('./IMAGE/led-analog-tx.png')";
+                        mmisound.src = "./sound/call-jc.wav";
+                        mmisound.play();
+                        setTimeout(() => {
+                            document.getElementById("call1").style.backgroundImage = "url('./IMAGE/led-analog-rx.png')";
+                            document.getElementById("call2").innerHTML = "↙平原司机";
+                            document.getElementById("call2").style.color = "lightgreen";
+                            setTimeout(() => {
+                                document.getElementById("call1").style.backgroundImage = "url('./IMAGE/led-analog-default.png')";
+                                document.getElementById("call2").innerHTML = "↗平原司机";
+                            }, 1000);
+                        }, 3000);
+                    }    
+                break;
+                case "bt8":     // left8
+                    if(netstate == 0)
+                        document.getElementById("call2").innerHTML = "正在呼叫站内组呼...";
+                    else
+                    {
+                        document.getElementById("call2").innerHTML = "正在呼叫平原车站...";
+                        document.getElementById("call1").style.backgroundImage = "url('./IMAGE/led-analog-tx.png')";
+                        setTimeout(() => {
+                            document.getElementById("call1").style.backgroundImage = "url('./IMAGE/led-analog-rx.png')";
+                            mmisound.src = "./sound/backling.wav";
+                            mmisound.play();
+                            document.getElementById("call2").innerHTML = "↙平原车站";
+                            document.getElementById("call2").style.color = "lightgreen";
+                            setTimeout(() => {
+                                document.getElementById("call1").style.backgroundImage = "url('./IMAGE/led-analog-default.png')";
+                                document.getElementById("call2").innerHTML = "↗平原车站";
+                            }, 1000);
+                        }, 3000);
+                    }
+                break;
+                case "bt9":     //  列尾排风
+                    if(mmiinfo[1] != 0 && mmistate != 110)
+                    {
+                        for(var i = 1;i < mmiinfo[2].length;i++)
+                        {
+                            setTimeout(() => {
+                                readnumber(mmiinfo[2].slice(i,i+1));
+                            }, timeout);
+                            timeout += 300;
+                        }
+                        setTimeout(() => {
+                            mmisound.src = "./sound/pf.wav";
+                            mmisound.play();
+                        }, 1500);
+                    }
+
+                    if(mmistate == 110)     //  排风按键试验
+                    {
+                        document.getElementById("line3info4").innerHTML += "\"列尾排风\"按键正常\n";
+                        document.getElementById("line3info5").innerHTML = "请按\"风压查询\"键试验！";
+                        mmisound.src = "./sound/请按键试验.wav";
+                        mmisound.play();
+                    }
+                    else if(mmistate == 1)     //  主界面排风键
+                    {
+                        document.getElementById("lwfyvalue").innerHTML = "500";
+                        mmiinfo[3] = "0500";
+                        document.getElementById("lwfyvalue").style.color = "red";
+                        setTimeout(() => {
+                            mmisound.src = "./sound/" + mmiinfo[2].slice(1,2) + ".wav";
+                            mmisound.play();
+                        }, 400);
+                        setTimeout(() => {
+                            mmisound.src = "./sound/" + mmiinfo[2].slice(2,3) + ".wav";
+                            mmisound.play();
+                        }, 800);
+                        setTimeout(() => {
+                            mmisound.src = "./sound/" + mmiinfo[2].slice(3,4) + ".wav";
+                            mmisound.play();
+                        }, 1200);
+                        setTimeout(() => {
+                            mmisound.src = "./sound/" + mmiinfo[2].slice(4,5) + ".wav";
+                            mmisound.play();
+                        }, 1600);
+                        setTimeout(() => {
+                            mmisound.src = "./sound/机车.wav";
+                            mmisound.play();
+                        }, 2000);
+                        setTimeout(() => {
+                            mmisound.src = "./sound/pf.wav";
+                            mmisound.play();
+                        }, 2800);
+                        setTimeout(() => {
+                            setTimeout(() => {
+                            mmisound.src = "./sound/" + mmiinfo[2].slice(1,2) + ".wav";
+                            mmisound.play();
+                        }, 400);
+                        setTimeout(() => {
+                            mmisound.src = "./sound/" + mmiinfo[2].slice(2,3) + ".wav";
+                            mmisound.play();
+                        }, 800);
+                        setTimeout(() => {
+                            mmisound.src = "./sound/" + mmiinfo[2].slice(3,4) + ".wav";
+                            mmisound.play();
+                        }, 1200);
+                        setTimeout(() => {
+                            mmisound.src = "./sound/" + mmiinfo[2].slice(4,5) + ".wav";
+                            mmisound.play();
+                        }, 1600);
+                        setTimeout(() => {
+                            mmisound.src = "./sound/机车.wav";
+                            mmisound.play();
+                        }, 2000);
+                        setTimeout(() => {
+                            mmisound.src = "./sound/注意.wav";
+                            mmisound.play();
+                        }, 2800);
+                        setTimeout(() => {
+                            mmisound.src = "./sound/风压.wav";
+                            mmisound.play();
+                        }, 3600);
+                        setTimeout(() => {
+                            mmisound.src = "./sound/" + mmiinfo[3].slice(1,2) + ".wav";
+                            mmisound.play();
+                        }, 4400);
+                        setTimeout(() => {
+                            mmisound.src = "./sound/" + mmiinfo[3].slice(2,3) + ".wav";
+                            mmisound.play();
+                        }, 4800);
+                        setTimeout(() => {
+                            mmisound.src = "./sound/" + mmiinfo[3].slice(3,4) + ".wav";
+                            mmisound.play();
+                        }, 5200);
+                        }, 4800);
+                        
+                    }
+                break;
+                case "bt10":    //  列尾销号
+                    if(mmiinfo[1] != "1")
+                    {
+                        document.getElementById("lwstate").innerHTML = "销号";
+                        document.getElementById("lwfyvalue").innerHTML = "600";
+                        document.getElementById("call2").innerHTML = mmiinfo[1].slice(1,7) + "号尾部装置销号成功";
+                        mmiinfo[3] = "0000";
+                        setTimeout(() => {
+                            document.getElementById("lwidtext").remove();
+                            document.getElementById("lwid").remove();
+                            document.getElementById("lwstate").innerHTML = "未连接";
+                            document.getElementById("lwfyvalue").innerHTML = "不确定";
+                            setTimeout(() => {
+                            mmisound.src = "./sound/" + mmiinfo[2].slice(1,2) + ".wav";
+                            mmisound.play();
+                        }, 400);
+                        setTimeout(() => {
+                            mmisound.src = "./sound/" + mmiinfo[2].slice(2,3) + ".wav";
+                            mmisound.play();
+                        }, 800);
+                        setTimeout(() => {
+                            mmisound.src = "./sound/" + mmiinfo[2].slice(3,4) + ".wav";
+                            mmisound.play();
+                        }, 1200);
+                        setTimeout(() => {
+                            mmisound.src = "./sound/" + mmiinfo[2].slice(4,5) + ".wav";
+                            mmisound.play();
+                        }, 1600);
+                        setTimeout(() => {
+                            mmiinfo[1] = "";
+                            mmisound.src = "./sound/机车.wav";
+                            mmisound.play();
+                        }, 2000);
+                        setTimeout(() => {
+                            mmisound.src = "./sound/消号成功.wav";
+                            mmisound.play();
+                        }, 2800);
+                        }, 3000);
+                    }
+                break;
+                case "bt11":    //  列尾确认
+                    if(mmiinfo[1] == "")
+                    {
+                        drawmenu();
+                    }
+                break;
+                case "bt12":    //  风压查询键
+                    if(mmistate == 1)
+                    {
+                        setTimeout(() => {
+                            mmisound.src = "./sound/" + mmiinfo[2].slice(1,2) + ".wav";
+                            mmisound.play();
+                        }, 400);
+                        setTimeout(() => {
+                            mmisound.src = "./sound/" + mmiinfo[2].slice(2,3) + ".wav";
+                            mmisound.play();
+                        }, 800);
+                        setTimeout(() => {
+                            mmisound.src = "./sound/" + mmiinfo[2].slice(3,4) + ".wav";
+                            mmisound.play();
+                        }, 1200);
+                        setTimeout(() => {
+                            mmisound.src = "./sound/" + mmiinfo[2].slice(4,5) + ".wav";
+                            mmisound.play();
+                        }, 1600);
+                        setTimeout(() => {
+                            mmisound.src = "./sound/jcfy.wav";
+                            mmisound.play();
+                        }, 2000);
+                        setTimeout(() => {
+                            mmisound.src = "./sound/" + mmiinfo[3].slice(1,2) + ".wav";
+                            mmisound.play();
+                        }, 3600);
+                        setTimeout(() => {
+                            mmisound.src = "./sound/" + mmiinfo[3].slice(2,3) + ".wav";
+                            mmisound.play();
+                        }, 4000);
+                        setTimeout(() => {
+                            mmisound.src = "./sound/" + mmiinfo[3].slice(3,4) + ".wav";
+                            mmisound.play();
+                        }, 4400);
+                    }
+                    else if(mmistate == 110)     // 风压按键试验
+                    {
+                        document.getElementById("line3info4").innerHTML += "\"风压查询\"按键正常\n";
+                        document.getElementById("line3info5").innerHTML = "请按\"确认/签收\"键试验！";
+                        mmisound.src = "./sound/请按键试验.wav";
+                        mmisound.play();
+                    }
+                break;
+
+                // judge right button
+                case "rt1":     //  呼叫键
+                    
+                    mmiinfo[43] = document.getElementById("call2").innerText;
+                    document.getElementById("call2").innerHTML = "正在呼叫" + document.getElementById("call2").innerText + "...";
+                break;
+
+                case "rt2":     // number 1
+                    //console.log(mmistate+"RT2");
+                    if(mmistate == 1)
+                        document.getElementById("call2").innerHTML += "1";
+                    else if(mmistate == 210)
+                        document.getElementById("traincodeinput").value += "1";
+                    else if(mmistate == 260 || mmistate == 270)
+                    {
+                        if(document.getElementById("lwidinput").value.length < 6)
+                            document.getElementById("lwidinput").value += "1";
+                    }                
+                break;
+
+                case "rt3":     // number 2
+                    if(mmistate == 1)
+                        document.getElementById("call2").innerHTML += "2";  
+                    else if(mmistate == 210)
+                        document.getElementById("traincodeinput").value += "2";
+                    else if(mmistate == 260 || mmistate == 270)
+                    {
+                        if(document.getElementById("lwidinput").value.length < 6)
+                            document.getElementById("lwidinput").value += "2";
+                    }
+                break;
+
+                case "rt4":     // number 3
+                    //alert(typeof(document.getElementById("menuoption11").innerHTML));
+                    if(mmistate == 1)
+                        document.getElementById("call2").innerHTML += "3";   
+                    else if(mmistate == 210)
+                        document.getElementById("traincodeinput").value += "3";
+                    else if(mmistate == 260 || mmistate == 270)
+                    {
+                        if(document.getElementById("lwidinput").value.length < 6)
+                            document.getElementById("lwidinput").value += "3";
+                    }
+                break;
+                case "rt5":     //  切换键
+                    
+                break;
+
+                case "rt6":     // number 4
+                    if(mmistate == 1)
+                        document.getElementById("call2").innerHTML += "4";
+                    else if(mmistate == 210)
+                        document.getElementById("traincodeinput").value += "4";
+                    else if(mmistate == 260 || mmistate == 270)
+                    {
+                        if(document.getElementById("lwidinput").value.length < 6)
+                            document.getElementById("lwidinput").value += "4";
+                    }
+                break;
+
+                case "rt7":     // number 5
+                    if(mmistate == 1)
+                        document.getElementById("call2").innerHTML += "5"; 
+                    else if(mmistate == 210)
+                        document.getElementById("traincodeinput").value += "5";
+                    else if(mmistate == 260 || mmistate == 270)
+                    {
+                        if(document.getElementById("lwidinput").value.length < 6)
+                            document.getElementById("lwidinput").value += "5";
+                    }   
+                break;
+
+                case "rt8":     // number 6
+                    if(mmistate == 1)
+                        document.getElementById("call2").innerHTML += "6";
+                    else if(mmistate == 210)
+                        document.getElementById("traincodeinput").value += "5";
+                    else if(mmistate = 260 || mmistate == 270)
+                    {
+                        if(document.getElementById("lwidinput").value.length < 6)
+                            document.getElementById("lwidinput").value += "6";
+                    }
+                    
+                break;
+
+                case "rt9":         //  挂断键
+                    document.getElementById("call2").style.color = "black";
+                    document.getElementById("call2").innerHTML = "通话结束";
+                    setTimeout(() => {
+                        document.getElementById("call2").innerHTML = "";
+                    }, 3000);
+                break;
+
+                case "rt10":        // number 7
+                    if(mmistate == 1)
+                        document.getElementById("call2").innerHTML += "7";
+                    else if(mmistate == 210)
+                        document.getElementById("traincodeinput").value += "7";
+                    else if(mmistate == 260 || mmistate == 270)
+                    {
+                        if(document.getElementById("lwidinput").value.length < 6)
+                            document.getElementById("lwidinput").value += "7";
+                    }    
+                break;
+
+                case "rt11":        // number 8
+                    if(mmistate == 1)
+                        document.getElementById("call2").innerHTML += "8";
+                    else if(mmistate == 210)
+                        document.getElementById("traincodeinput").value += "8";
+                    else if(mmistate == 260 || mmistate == 270)
+                    {
+                        if(document.getElementById("lwidinput").value.length < 6)
+                            document.getElementById("lwidinput").value += "8";
+                    }    
+                break;
+
+                case "rt12":        // number 9
+                    if(mmistate == 1)
+                        document.getElementById("call2").innerHTML += "9";  
+                    else if(mmistate == 210)
+                        document.getElementById("traincodeinput").value += "9";
+                    else if(mmistate == 260 || mmistate == 270)
+                    {
+                        if(document.getElementById("lwidinput").value.length < 6)
+                            document.getElementById("lwidinput").value += "9";
+                    }  
+                break;
+
+                case "rt13":    //  空白键
+                    
+                break;
+
+                case "rt14":    //  *键
+                    
+                break;
+
+                case "rt15":        // number 0
+                    if(mmistate == 1)
+                        document.getElementById("call2").innerHTML += "0"; 
+                    else if(mmistate == 210)
+                        document.getElementById("traincodeinput").value += "0";
+                    else if(mmistate == 260 || mmistate == 270)
+                    {
+                        if(document.getElementById("lwidinput").value.length < 6)
+                            document.getElementById("lwidinput").value += "0";
+                    }   
+                break;
+
+                case "rt16":        //  #键
+                    
+                break;
+
+                case "rt17":        //  紧急呼叫
+                    document.getElementById("call2").innerHTML = "正在呼叫紧急呼叫...";
+                break;
+                case "rt18":break;
+                case "rt19":        // up key
+                    if(mmistate == 20)
+                        {
+                            if(menuopcount == 1)
+                                menuopcount = 10;
+                            else if(menuopcount >= 2 && menuopcount <= 10)
+                                menuopcount -= 1;
+                        }
+                        else if(mmistate == 220 || Math.floor(mmistate / 100) == 22)        // 路局运行区段
+                        {
+                            if(menuopcount == 1)
+                                menuopcount = 13;
+                            else if(menuopcount >= 2 && menuopcount <= 12)
+                                menuopcount -= 1;
+                        }
+                        else if(mmistate == 300)        //  出入库自检GPRS
+                        {
+                            if(menuopcount == 1)
+                            {
+                                document.getElementById("menuoption8").style.backgroundColor = "#0000cc";
+                                document.getElementById("menuoption8").style.color = "yellow";
+                                menuopcount = 8;
+                            } 
+                            else if(menuopcount >= 2 && menuopcount <= 8)
+                                menuopcount -= 1;
+                        }
+                        else if(mmistate == 2700)        //  维护界面选项上移
+                        {
+                            if(menuopcount == 1)
+                            {
+                                document.getElementById("menuoption11").style.backgroundColor = "#0000cc";
+                                document.getElementById("menuoption11").style.color = "yellow";
+                                menuopcount = 11;
+                            } 
+                            else if(menuopcount >= 2 && menuopcount <= 11)
+                                menuopcount -= 1;
+                        }
+
+                    menuoptionlight("up");
+                break;
+                case "rt20":        // menu key
+                        drawmenu();
+                    break;
+                case "rt21":        //  报警键
+                    if(mmistate == 110)     //  报警按键试验
+                    {
+                        document.getElementById("line3info4").innerHTML = "\"报警\"按键正常\n";
+                        document.getElementById("line3info5").innerHTML = "请按\"列尾排风\"键试验！";
+                        mmisound.src = "./sound/请按键试验.wav";
+                        mmisound.play();
+                    }
+                    else if(mmistate == 1)  //  LBJ报警
+                    {
+                        timeout = 8;
+                        buttondowntime = setInterval(() => {
+                            mmistate = 100;
+                            if(timeout != 0)
+                            {
+                                document.getElementById("line3info5").innerHTML = "按\"确认\"键发送报警信息，按\"退出\"键返回&nbsp&nbsp&nbsp" + timeout + "秒";
+                                timeout -= 1;
+                            }
+                            else
+                            {
+                                clearInterval(buttondowntime);
+                                document.getElementById("line3info5").innerHTML = "";
+                                mmistate = 1;
+                            }
+                                
+                        }, 1000);
+                        mmisound.src = "./sound/按确认键发送报警.wav";
+                        mmisound.play();
+                        
+                    }
+                    else if(mmistate == 101)
+                    {
+                        clearInterval(buttondowntime);
+                        document.getElementById("line3info4").innerHTML = "列车防护报警已解除！";
+                        setTimeout(() => {
+
+                            if(infosave[0] == 0)
+                                document.getElementById("line3info1").style.backgroundImage = "url('./IMAGE/lbj-only-tx.png')";
+                            else
+                                document.getElementById("line3info1").style.backgroundImage = "url('./IMAGE/lbj-all.png')";
+                            document.getElementById("line3info3").style.color = document.getElementById("line3info4").style.color ="yellow";
+                            document.getElementById("line3info4").innerHTML = document.getElementById("line3info5").innerHTML = "";
+                            mmistate = 1;
+                        }, 3000);
+                        
+
+                    }
+                break;
+                case "rt22":        // left key
+                    if(Math.floor(mmistate / 100) == 22)        // 路局区段信息左翻页
+                    {   
+                        if(currentpage >= 2)
+                        {
+                            currentpage -= 1;
+                            document.getElementById("menuoption1").innerHTML = "线路选择：     " + currentpage + "/" + pagecount + "页";
+                            currentpage += 1;
+                            if(currentpage != 1)
+                            {
+                                pagestep = (currentpage - 1) * 10;
+                                currentpage -= 1;
+                            }
+                                
+                            for(var i = 2;i <= 11;i++)
+                            {
+                                if(mmistate <= 2280)
+                                {
+                                    switch(Math.floor(mmistate % 100 / 10))
+                                    {
+                                    case 0:     //  北京局 2200
+                                        document.getElementById("menuoption"+i).innerHTML = routeinfobeijing[i+pagestep-12];
+                                    break;
+                                    case 1:     //  济南局 2210
+                                        document.getElementById("menuoption"+i).innerHTML = routeinfojinan[i+pagestep-12];
+                                    break;
+                                    case 2:     //  上海局 2220
+                                        document.getElementById("menuoption"+i).innerHTML = routeinfoshanghai[i+pagestep-12];
+                                    break;
+                                    case 3:     //  兰州局 2230
+                                        document.getElementById("menuoption"+i).innerHTML = routeinfolanzhou[i+pagestep-12];
+                                    break;
+                                    case 4:     //  西安局 2240
+                                        document.getElementById("menuoption"+i).innerHTML = routeinfoxian[i+pagestep-12];
+                                    break;
+                                    case 5:     //  武汉局 2250
+                                        document.getElementById("menuoption"+i).innerHTML = routeinfowuhan[i+pagestep-12];
+                                    break;
+                                    case 6:     //  南昌局 2260
+                                        document.getElementById("menuoption"+i).innerHTML = routeinfonanchang[i+pagestep-12];
+                                    break;
+                                    case 7:     //  广州局 2270
+                                        document.getElementById("menuoption"+i).innerHTML = routeinfoguangzhou[i+pagestep-12];
+                                    break;
+                                    case 8:     //  成都局 2280
+                                        document.getElementById("menuoption"+i).innerHTML = routeinfochengdu[i+pagestep-12];
+                                    break;
+                                    }
+                                }
+                                else
+                                {
+                                    switch(Math.floor(mmistate % 100))
+                                    {
+                                        case 11:     //  哈尔滨局 2211
+                                            document.getElementById("menuoption"+i).innerHTML = routeinfohaerbin[i+pagestep-12];
+                                        break;
+                                        case 12:     //  沈阳局 2212
+                                            document.getElementById("menuoption"+i).innerHTML = routeinfoshenyang[i+pagestep-12];
+                                        break;
+                                        case 13:     //  青藏局 2213
+                                            document.getElementById("menuoption"+i).innerHTML = routeinfoqingzang[i+pagestep-12];
+                                        break;
+                                        case 14:     //  太原局 2214
+                                            document.getElementById("menuoption"+i).innerHTML = routeinfotaiyuan[i+pagestep-12];
+                                        break;
+                                        case 15:     //  南宁局 2215
+                                            document.getElementById("menuoption"+i).innerHTML = routeinfonanning[i+pagestep-12];
+                                        break;
+                                        case 16:     //  昆明局 2216
+                                            document.getElementById("menuoption"+i).innerHTML = routeinfokunming[i+pagestep-12];
+                                        break;
+                                        case 17:     //  呼局 2217
+                                            document.getElementById("menuoption"+i).innerHTML = routeinfohuhehaote[i+pagestep-12];
+                                        break;
+                                        case 18:     //  郑州局 2218
+                                            document.getElementById("menuoption"+i).innerHTML = routeinfozhengzhou[i+pagestep-12];
+                                        break;
+                                        case 19:     //  乌鲁木齐局 2219
+                                            document.getElementById("menuoption"+i).innerHTML = routeinfowulumuqi[i+pagestep-12];
+                                        break;
+                                    }
+                                }
+                                
+                            }
+                        }
+                        
+                    }
+                    else if(mmistate == 22)
+                    {
+                        for(var i = 1;i <= 11;i++)
+                            document.getElementById("menuoption"+i).innerHTML = routechoosefill[i-1];
+                    }
+                    else if(Math.floor(mmistate / 10) == 27)    // 维护界面右翻页
+                    {
+                        
+                        if(pagecount == 2)
+                        {
+                            pagecount -= 1;
+                            pagestep = (pagecount * 10) - 10;
+                            for(var i = 1;i <= 11;i++)
+                            {
+                                document.getElementById("menuoption"+i).innerHTML = "";
+                                document.getElementById("menuoption"+i).innerHTML = weihufill[pagestep+i-1];
+                            }
+                            //document.getElementById("menuoption1").innerHTML = "维护界面：&nbsp&nbsp&nbsp&nbsp" + pagecount + "/3";
+                        }
+                        else if(pagecount == 3)
+                        {
+                            pagecount -= 1;
+                            pagestep = (pagecount * 10) - 10;
+                            for(var i = 1;i <= 11;i++)
+                            {
+                                document.getElementById("menuoption"+i).innerHTML = "";
+                                document.getElementById("menuoption"+i).innerHTML = weihufill[pagestep+i+1-1];
+                            }
+                        }
+                    }
+
+                break;
+                case "rt23":        // que_ren key
+                    console.log("queren"+mmistate+"-"+menuopcount);
+                    if(Math.floor(mmistate / 10) == 2)
+                    {
+                        switch(menuopcount)
+                        {
+                            case 1:     // train code
+                                if(mmiinfo[0] == "1")
+                                {
+                                var traincodetip = document.createElement("div");
+                                document.getElementById("menuoption11").appendChild(traincodetip);
+                                traincodetip.className = "train-code-tip";
+                                traincodetip.id = "traincodetip";
+                                traincodetip.style.color = "#00ecec";
+                                traincodetip.innerHTML = "请输入车次号：";
+                                var traincodeinput = document.createElement("input");
+                                document.getElementById("menuoption11").appendChild(traincodeinput);
+                                traincodeinput.className = "train-code-input";
+                                traincodeinput.id = "traincodeinput";
+                                traincodeinput.style.fontSize = mmiheight * 0.025;
+                                traincodeinput.focus();
+                                document.getElementById("menuoption12").style.display = "flex";
+                                document.getElementById("menuoption12").style.justifyContent = "center";
+                                mmistate = 210;
+                                }
+                                else
+                                {
+                                    //alert("xh");
+                                    document.getElementById("menuoption12").innerHTML = "正在注销车次号";
+                                    
+                                    setTimeout(() => {
+                                        document.getElementById("mmimenu").remove();
+                                        mmistate = 1;
+                                        document.getElementById("call2").innerHTML = "";
+                                        switch(mmiinfo[0].length)
+                                        {
+                                            case 2:
+                                                setTimeout(() => {
+                                                    readnumber(mmiinfo[0].slice(0,1));
+                                                }, 400);
+                                                setTimeout(() => {
+                                                    readnumber(mmiinfo[0].slice(1,2));
+                                                }, 800);
+                                            break;
+                                            case 3:
+                                                setTimeout(() => {
+                                                    readnumber(mmiinfo[0].slice(0,1));
+                                                }, 400);
+                                                setTimeout(() => {
+                                                    readnumber(mmiinfo[0].slice(1,2));
+                                                }, 800);
+                                                setTimeout(() => {
+                                                    readnumber(mmiinfo[0].slice(2,3));
+                                                }, 1200);
+                                            break;
+                                            case 4:
+                                                setTimeout(() => {
+                                                    readnumber(mmiinfo[0].slice(0,1));
+                                                }, 400);
+                                                setTimeout(() => {
+                                                    readnumber(mmiinfo[0].slice(1,2));
+                                                }, 800);
+                                                setTimeout(() => {
+                                                    readnumber(mmiinfo[0].slice(2,3));
+                                                }, 1200);
+                                                setTimeout(() => {
+                                                    readnumber(mmiinfo[0].slice(3,4));
+                                                }, 1600);
+                                            break;
+                                            case 5:
+                                                setTimeout(() => {
+                                                    readnumber(mmiinfo[0].slice(0,1));
+                                                }, 400);
+                                                setTimeout(() => {
+                                                    readnumber(mmiinfo[0].slice(1,2));
+                                                }, 800);
+                                                setTimeout(() => {
+                                                    readnumber(mmiinfo[0].slice(2,3));
+                                                }, 1200);
+                                                setTimeout(() => {
+                                                    readnumber(mmiinfo[0].slice(3,4));
+                                                }, 1600);
+                                                setTimeout(() => {
+                                                    readnumber(mmiinfo[0].slice(4,5));
+                                                    mmiinfo[0] = "1";
+                                                    menufill[0] = "1、车次功能号注册";
+                                                }, 2000);
+                                            break;    
+                                        }
+                                        setTimeout(() => {
+                                            mmisound.src = "./sound/车次号.wav";
+                                            mmisound.play();
+                                        }, 2400);
+                                        setTimeout(() => {
+                                            mmisound.src = "./sound/注销成功.wav";
+                                            mmisound.play();
+                                        }, 3400);
+                                        document.getElementById("call2").innerHTML = "车次号注销成功";
+                                        document.getElementById("traincode").innerHTML = "未注册";
+                                        document.getElementById("traincode").style.color = "red";
+                                    }, 3000);
+
+                                }
+                            break;
+                            case 2:     // running segemnt
+                                document.getElementById("menuoption11").style.backgroundColor = "#0000cc";
+                                document.getElementById("menuoption11").style.color = "yellow";
+                                for(var i = 1;i <= 11;i++)
+                                {
+                                    document.getElementById("menuoption"+i).innerHTML = routechoosefill[i-1];
+                                }
+                                mmistate = 220;
+                                segpagecount = 1;
+                            break;
+                            case 6:             // 列尾输号选项
+                                var traincodetip = document.createElement("div");
+                                document.getElementById("menuoption11").appendChild(traincodetip);
+                                traincodetip.className = "train-code-tip";
+                                traincodetip.id = "lwidtip";
+                                traincodetip.style.color = "#00ecec";
+                                traincodetip.innerHTML = "请输入6位列尾ID：";
+                                var traincodeinput = document.createElement("input");
+                                document.getElementById("menuoption11").appendChild(traincodeinput);
+                                traincodeinput.className = "train-code-input";
+                                traincodeinput.id = "lwidinput";
+                                traincodeinput.maxLength = 6;
+                                traincodeinput.style.fontSize = mmiheight * 0.025;
+                                traincodeinput.focus();
+                                document.getElementById("menuoption12").style.display = "flex";
+                                document.getElementById("menuoption12").style.justifyContent = "center";
+                                mmistate = 260;
+                                console.log(mmistate+"1ST确认");
+                            break;
+                            case 7:         //  维护选项
+                                var traincodetip = document.createElement("div");
+                                document.getElementById("menuoption11").appendChild(traincodetip);
+                                traincodetip.className = "train-code-tip";
+                                traincodetip.id = "passwordtext";
+                                traincodetip.style.color = "#00ecec";
+                                traincodetip.innerHTML = "请输入密码：";
+                                var traincodeinput = document.createElement("input");
+                                document.getElementById("menuoption11").appendChild(traincodeinput);
+                                traincodeinput.className = "train-code-input";
+                                traincodeinput.id = "lwidinput";
+                                traincodeinput.style.color = "purple";
+                                traincodeinput.style.fontSize = mmiheight * 0.025;
+                                traincodeinput.focus();
+                                document.getElementById("menuoption12").style.display = "flex";
+                                document.getElementById("menuoption12").style.justifyContent = "center";
+                                mmistate = 270;
+                                console.log("select-weihu"+mmistate);
+                            break;
+                            case 8:         //  状态查询选项
+                                for(var i = 1;i <= 11;i++)
+                                    document.getElementById("menuoption"+i).innerHTML = stateinfofill[i-1];
+                                document.getElementById("menuoption11").style.backgroundColor = "#0000cc";
+                                document.getElementById("menuoption11").style.color = "yellow";
+                                mmistate = 280;
+                            break;
+                            case 10:        //  出入库检测
+                                for(var i = 1;i <= 10;i++)
+                                {
+                                    if(i <= 8)
+                                        document.getElementById("menuoption"+i).innerHTML = checkselffill[i-1];
+                                    else
+                                        document.getElementById("menuoption"+i).innerHTML = "";
+                                }
+                                document.getElementById("menuoption10").style.backgroundColor = "#0000cc";
+                                document.getElementById("menuoption10").style.color = "yellow";
+                                mmistate = 300;
+                                menuopcount = 1;
+                                document.getElementById("menuoption1").style.backgroundColor = "rgb(1, 254, 0)";
+                                document.getElementById("menuoption1").style.color = "white";
+                                
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        //console.log(mmistate+"queren_else");
+                    switch(Math.floor(mmistate / 10))       // 输入完毕发送数据
+                    {
+                        case 10:        //  列车报警试验信息确认
+                            if(mmistate == 108)
+                            {
+                                clearInterval(buttondowntime);
+                                document.getElementById("line3info4").innerHTML = "注意，收到列车报警试验信息，已确认！\n车次号：" + mmiinfo[0] + "机车号:" + document.getElementById("loconum").innerText;
+                                document.getElementById("line3info4").style.color = "yellow";
+                                document.getElementById("line3info5").innerHTML = "";
+                                setTimeout(() => {
+                                    document.getElementById("line3info4").innerHTML = "";
+                                    document.getElementById("line3info5").innerHTML = "请按\"报警\"键试验！";
+                                    mmisound.src = "./sound/请按键试验.wav";
+                                    mmisound.play();
+                                    mmistate = 110;
+                                }, 3000);
+                                console.log(mmistate+"KJ");
+                            }
+                            else if(mmistate == 100)
+                            {
+                                clearInterval(buttondowntime);
+                                buttondowntime = setInterval(() => {
+                                    document.getElementById("line3info1").style.backgroundImage = "url('./IMAGE/lbj-wran.png')";
+                                    setTimeout(() => {
+                                        document.getElementById("line3info1").style.backgroundImage = "none";
+                                    }, 1000);
+                                    //mmisound.src = "./sound/1KHz500ms.wav";
+                                    //mmisound.play();
+                                }, 2000);
+
+                                document.getElementById("line3info3").style.color = "red";
+                                document.getElementById("line3info4").innerHTML = "本车正在发送报警信息！";
+                                document.getElementById("line3info4").style.color = "red";
+                                document.getElementById("line3info5").innerHTML = "再次按下\"报警\"键3秒后解除报警";
+                                mmistate = 101;
+                            }
+                        break;
+                        case 11:        //  按键试验完毕
+                            document.getElementById("line3info4").innerHTML += "\"确认/签收\"按键正常";
+                            setTimeout(() => {
+                                document.getElementById("line3info4").innerHTML = "";
+                            }, 3000);
+                            
+                            document.getElementById("line3info5").innerHTML = "";
+                            mmistate = 1;
+                        break;
+                        case 21:        // 车次号注册
+                            mmiinfo[0] = document.getElementById("traincodeinput").value;
+                        //alert(typeof(mmiinfo[0]));
+                            document.getElementById("traincodetip").remove();
+                            document.getElementById("traincodeinput").remove();
+                            document.getElementById("menuoption11").innerHTML = "正在注册车次号......";
+                            setTimeout(() => {
+                                document.getElementById("mmimenu").remove();
+                                document.getElementById("traincode").innerHTML = "注册中";
+                                document.getElementById("traincode").style.color = "black";
+                            mmistate = 1;
+                            menuopcount = 1;
+                            }, 3000);
+                            setTimeout(() => {
+                                document.getElementById("traincode").style.color = "white";
+                                document.getElementById("traincode").innerHTML = mmiinfo[0];
+                                //readtraintype();
+                                document.getElementById("call2").innerHTML = "车次号注册成功";
+                                setTimeout(() => {
+                                    document.getElementById("call2").innerHTML = "";
+                                }, 3000);
+
+                                switch(mmiinfo[0].length)
+                                {
+                                    case 2:
+                                        setTimeout(() => {
+                                            readnumber(mmiinfo[0].slice(0,1));
+                                        }, 400);
+                                        setTimeout(() => {
+                                            readnumber(mmiinfo[0].slice(1,2));
+                                        }, 800);
+                                    break;
+                                    case 3:
+                                        setTimeout(() => {
+                                        readnumber(mmiinfo[0].slice(0,1));
+                                    }, 400);
+                                        setTimeout(() => {
+                                        readnumber(mmiinfo[0].slice(1,2));
+                                    }, 800);
+                                        setTimeout(() => {
+                                        readnumber(mmiinfo[0].slice(2,3));
+                                    }, 1200);
+                                    break;
+                                    case 4:
+                                        setTimeout(() => {
+                                        readnumber(mmiinfo[0].slice(0,1));
+                                    }, 400);
+                                        setTimeout(() => {
+                                        readnumber(mmiinfo[0].slice(1,2));
+                                    }, 800);
+                                        setTimeout(() => {
+                                        readnumber(mmiinfo[0].slice(2,3));
+                                    }, 1200);
+                                        setTimeout(() => {
+                                        readnumber(mmiinfo[0].slice(3,4));
+                                    }, 1600);
+                                    break;
+                                    case 5:
+                                        setTimeout(() => {
+                                        readnumber(mmiinfo[0].slice(0,1));
+                                    }, 400);
+                                        setTimeout(() => {
+                                        readnumber(mmiinfo[0].slice(1,2));
+                                    }, 800);
+                                        setTimeout(() => {
+                                        readnumber(mmiinfo[0].slice(2,3));
+                                    }, 1200);
+                                        setTimeout(() => {
+                                        readnumber(mmiinfo[0].slice(3,4));
+                                    }, 1600);
+                                    setTimeout(() => {
+                                        readnumber(mmiinfo[0].slice(4,5));
+                                    }, 2000);
+                                    break;
+                                }
+                                setTimeout(() => {
+                                        mmisound.src = "./sound/cchzccg.wav";
+                                        mmisound.play();
+                                    }, 2400);
+                            //console.log(mmistate);
+                            }, 5000);
+                        break;
+                        
+                        case 22:        // 运行区段
+                            if(segpagecount == 1)
+                            {
+                                getpagecount(menuopcount - 3);
+                                mmistate = 2200 + ((menuopcount - 3) * 10);
+                            }
+                            else
+                            {
+                                getpagecount(10 + menuopcount - 1);
+                                mmistate = 2200 + ((menuopcount - 1) + 10);
+                            }
+                        break;
+                        
+                        case 220:
+                            document.getElementById("line3info7").innerHTML = document.getElementById("menuoption"+menuopcount).innerText;
+                            document.getElementById("line3info6").innerHTML = "手动";
+                            document.getElementById("mmimenu").remove();
+                            mmistate = 1;
+                            menuopcount = 1;
+                        break;
+
+                        case 221:
+                            document.getElementById("line3info7").innerHTML = document.getElementById("menuoption"+menuopcount).innerText;
+                            document.getElementById("line3info6").innerHTML = "手动";
+                            document.getElementById("mmimenu").remove();
+                            mmistate = 1;
+                            menuopcount = 1;
+                        break;
+
+                        case 26:        // 连接列尾
+                            
+                            if(document.getElementById("lwidinput").value != "000000")
+                                lwback = document.getElementById("lwidinput").value;
+                            mmiinfo[1] = "9" + document.getElementById("lwidinput").value;
+                            //alert(typeof(mmiinfo[1]));
+                            document.getElementById("lwidtip").remove();
+                            document.getElementById("lwidinput").remove();
+                            if(mmiinfo[1] == "9000000")
+                            {
+                                document.getElementById("menuoption11").innerHTML = "正在发送消号指令......";
+                                document.getElementById("call2").innerHTML = "";
+                            }
+                                
+                            else
+                            {
+                                document.getElementById("menuoption11").innerHTML = "正在发送输号指令......";
+                                document.getElementById("lwfyvalue").innerHTML = "不确定";
+                            }
+                                
+                            setTimeout(() => {
+                                document.getElementById("mmimenu").remove();
+                                var lwidtext = document.createElement("div");
+                                document.getElementById("maininterfaceline2").appendChild(lwidtext);
+                                lwidtext.className = "lw-state";
+                                lwidtext.id = "lwidtext";
+                                lwidtext.innerHTML = "列尾ID：";
+                                lwidtext.style.marginLeft = "3.5%";
+                                var lwidnum = document.createElement("div");
+                                document.getElementById("maininterfaceline2").appendChild(lwidnum);
+                                lwidnum.className = "loco-num";
+                                lwidnum.id = "lwid";
+                                lwidnum.style.color = "black";
+                                lwidnum.innerHTML = mmiinfo[1].slice(1,7);
+                                    
+                                setTimeout(() => {
+                                    mmisound.src = "./sound/" + lwback.slice(0,1) + ".wav";
+                                    mmisound.play();
+                                }, 400);
+                                setTimeout(() => {
+                                    mmisound.src = "./sound/" + lwback.slice(1,2) + ".wav";
+                                    mmisound.play();
+                                }, 800);
+                                setTimeout(() => {
+                                    mmisound.src = "./sound/" + lwback.slice(2,3) + ".wav";
+                                    mmisound.play();
+                                }, 1200);
+                                setTimeout(() => {
+                                    mmisound.src = "./sound/" + lwback.slice(3,4) + ".wav";
+                                    mmisound.play();
+                                }, 1600);
+                                setTimeout(() => {
+                                    mmisound.src = "./sound/" + lwback.slice(4,5) + ".wav";
+                                    mmisound.play();
+                                }, 2000);
+                                setTimeout(() => {
+                                    mmisound.src = "./sound/" + lwback.slice(5,6) + ".wav";
+                                    mmisound.play();
+                                }, 2400);
+                                setTimeout(() => {
+                                    if(mmiinfo[1] != "9000000")
+                                    {
+                                        //document.getElementById("lwid").innerHTML = mmiinfo[1].slice(1,mmiinfo[1].length);
+                                        document.getElementById("lwstate").innerHTML = "已连接";
+                                        //document.getElementById("lwid").style.color = "black";
+                                        document.getElementById("lwfyvalue").innerHTML = 600;
+                                        mmisound.src = "./sound/ljcg.wav";
+                                    } 
+                                    else
+                                    {
+                                        document.getElementById("lwidtext").remove();
+                                        document.getElementById("lwid").remove();
+                                        document.getElementById("lwstate").innerHTML = "未连接";
+                                        document.getElementById("lwfyvalue").innerHTML = "不确定";
+                                        mmisound.src = "./sound/xhcg.wav";
+                                    }
+                                        
+                                    mmisound.play();
+                                }, 2800);
+
+                                document.getElementById("lwstate").style.color = "black";
+                                
+                                document.getElementById("lwstate").style.width = "18%";
+                                mmistate = 1;
+                                menuopcount = 1;
+                            }, 3000);
+                        break;
+                        case 27:        //  维护界面初始化
+                            //console.log("que_ren"+mmistate);
+                            //console.log(document.getElementById("password").value);
+                            if(document.getElementById("lwidinput").value != "123456")
+                            {
+                                document.getElementById("lwidinput").value = "密码错误";
+                                setTimeout(() => {
+                                    document.getElementById("lwidinput").value = "";
+                                    document.getElementById("lwidinput").focus();
+                                }, 3000);
+                            }
+                            else
+                            {
+                                //alert("shit");
+                                document.getElementById("passwordtext").remove();
+                                document.getElementById("lwidinput").remove();
+                                for(var i = 1;i <= 11;i++)
+                                {
+                                    document.getElementById("menuoption"+i).innerHTML = weihufill[i-1];
+                                }
+                                
+                                document.getElementById("menuoption11").style.backgroundColor = "#0000cc";
+                                document.getElementById("menuoption11").style.color = "yellow";
+                                pagecount = 1;
+                                mmistate = 2700;
+                            }
+                        break;
+                        case 270:
+                            if(mmistate == 2700 && menuopcount == 2)        //  维护界面-机车号修改初始化
+                            {
+                                var traincodetip = document.createElement("div");
+                                document.getElementById("menuoption12").innerHTML = "";
+                                document.getElementById("menuoption12").appendChild(traincodetip);
+                                document.getElementById("menuoption12").style.display = "flex";
+                                document.getElementById("menuoption12").style.justifyContent = "flex-start";
+                                traincodetip.className = "train-code-tip";
+                                traincodetip.id = "passwordtext";
+                                traincodetip.style.color = "#00ecec";
+                                traincodetip.innerHTML = "请输入机车号：";
+                                var traincodeinput = document.createElement("input");
+                                document.getElementById("menuoption12").appendChild(traincodeinput);
+                                traincodeinput.className = "train-code-input";
+                                traincodeinput.maxLength = 8;
+                                traincodeinput.style.width = "30%";
+                                traincodeinput.id = "lwidinput";
+                                traincodeinput.style.color = "purple";
+                                traincodeinput.style.fontSize = mmiheight * 0.025;
+                                traincodeinput.focus();
+                                document.getElementById("menuoption12").style.display = "flex";
+                                document.getElementById("menuoption12").style.justifyContent = "center";
+                                mmistate = 2701;
+                            }
+                            else if(mmistate == 2701)
+                            {
+                                var index = lococode.indexOf(document.getElementById("lwidinput").value.slice(0,3));
+                                document.getElementById("loconum").innerHTML = lococode[index+2] + "-" + document.getElementById("lwidinput").value.slice(4,8);
+                                weihufill[1] = "1、机车号：" + document.getElementById("lwidinput").value.slice(0,8);
+                                mmiinfo[2] = "0" + document.getElementById("lwidinput").value.slice(0,8).slice(4,8);
+                                document.getElementById("menuoption2").innerHTML = weihufill[1];
+                                console.log("index-"+document.getElementById("lwidinput").value.slice(0,3));
+                                setTimeout(() => {
+                                    document.getElementById("lwidinput").remove();
+                                    document.getElementById("passwordtext").remove();
+                                    document.getElementById("menuoption12").innerHTML = menufill[11];
+                                    document.getElementById("loconumtext").style.color = document.getElementById("loconum").style.color = "white";
+                                }, 1000);
+                            }
+                        break;
+
+                        case 30:        //  出入库检测选项选择
+                            switch(menuopcount)
+                            {
+                                case 1:     //  自检
+                                    document.getElementById("menuoption9").innerHTML = "正在进行自检......";
+                                    document.getElementById("menuoption10").style.backgroundColor = "#0000cc";
+                                    document.getElementById("menuoption10").style.color = "yellow";
+
+                                    setTimeout(() => {
+                                        for(var i = 1;i <= 9;i++)
+                                        {
+                                            document.getElementById("menuoption"+i).innerHTML = checkselffill[i+7];
+                                        }
+                                        document.getElementById("menuoption11").innerHTML = checkselffill[17];
+                                    }, 3000);
+                                break;
+                                case 2:     //  GPRS检测
+                                    // 库检地址输入框待插入
+                                    document.getElementById("menuoption9").innerHTML = "已发送请求信息";
+                                    setTimeout(() => {
+                                        getinfomationwin("crkjc");
+                                        saveinfo(1);
+                                    }, 3000);
+                                break;
+                                case 3:     //  450M数据
+                                    // 库检地址输入框待插入
+                                    document.getElementById("menuoption9").innerHTML = "已发送请求信息";
+                                    setTimeout(() => {
+                                        getinfomationwin("crkjc");
+                                        saveinfo(1);
+                                    }, 3000);
+                                break;
+                                case 4:
+                                   document.getElementById("menuoption9").innerHTML = "450MHz同频通话测试";
+                                   mmisound.src = "./sound/backling.wav";
+                                   mmisound.play();
+                                break;
+                                case 5:
+                                    document.getElementById("menuoption9").innerHTML = "450MHz异频通话测试";
+                                    mmisound.src = "./sound/backling.wav";
+                                    mmisound.play();
+                                break;
+                                case 6:
+                                    document.getElementById("menuoption9").innerHTML = "GSM-R通话&nbsp&nbsp&nbsp&nbsp请讲话";
+                                break;
+                                case 8:
+                                    // 库检地址输入框待插入
+                                    document.getElementById("mmimenu").remove();
+                                    mmisound.src = "./sound/sdlcbjsyxx.wav";
+                                    mmisound.play();
+                                    document.getElementById("line3info4").innerHTML = "注意，收到列车报警试验信息，请确认！\n车次号：" + mmiinfo[0] + "&nbsp&nbsp&nbsp&nbsp机车号：" + document.getElementById("loconum").innerText;
+                                    document.getElementById("line3info4").style.color = "red";
+                                    timeout = 60;
+                                    document.getElementById("line3info1").style.backgroundImage = "url('./IMAGE/lbj-only-rx.png')";
+                                    buttondowntime = setInterval(() => {
+                                        if(timeout != 0)
+                                        {
+                                            document.getElementById("line3info5").innerHTML = "按\"确认\"键&nbsp&nbsp&nbsp&nbsp" + timeout + "秒";
+                                            timeout -= 1;
+                                        }
+                                        else
+                                        {
+                                            clearInterval(buttondowntime);
+                                            document.getElementById("line3info4").innerHTML = "";
+                                            mmistate = 1;
+                                        }
+                                        
+                                    }, 1000);
+                                    mmistate = 108;
+                                break;
+                            }
+                        break;
+                        default:
+                            if(mmistate >= 2230 && mmistate <= 2410)        //  运行区段线路选择后退出，主界面信息变更
+                            {
+                                document.getElementById("line3info6").innerHTML = "手动";
+                                document.getElementById("line3info7").innerHTML = document.getElementById("menuoption"+menuopcount).innerHTML;
+                                document.getElementById("mmimenu").remove();
+                                mmistate = 1;
+                                menuopcount = 1;
+                            }
+                            else if(mmistate == 31 || mmistate == 32 || mmistate == 33)     //  出入库检测信息签收，退回到出入库检测页面
+                            {
+                                if(infostate == 0)
+                                {
+                                    document.getElementById("infotext11").innerHTML = document.getElementById("infotext11").innerText.slice(0,document.getElementById("infotext11").innerText.length - 5) + "（已签收）";
+                                    mmisound.src = "./sound/yqs.wav";
+                                    mmistate = 1;
+                                    mmisound.play();
+                                    document.getElementById("infobox2").innerHTML =  document.getElementById("infobox2").innerText + "\n签收时间：" + getcircurrenttime(2) + "\n签收地点：公里标9999.9";
+                                    // 核心需求：向 B 发送 "success info"
+                                    channel.postMessage('success info');
+                                    //addLog(`已自动回复: success info`);
+                                    setTimeout(() => {
+                                        saveinfo(2);
+                                        document.getElementById("infowin").remove();
+                                        mmistate = 300;
+                                        console.log(infosave);
+                                    }, 3000);
+                                    document.getElementById("menuoption9").innerHTML = "";
+                                }
+
+                            }
+
+                        break;
+                    }
+                }
+                break;
+                case "rt24":    // right key
+                    if(Math.floor(mmistate / 100) == 22)        // 路局区段信息右翻页
+                    {   
+                        if(currentpage < pagecount)
+                        {
+                            currentpage += 1;
+                            document.getElementById("menuoption1").innerHTML = "线路选择：     " + currentpage + "/" + pagecount + "页";
+                            if(currentpage != 1)
+                                pagestep = (currentpage - 1) * 10;
+
+                            for(var i = 2;i <= 11;i++)
+                            {
+                                if(mmistate <= 2280)
+                                {
+                                    switch(Math.floor(mmistate % 100 / 10))
+                                    {
+                                    case 0:     //  北京局 2200
+                                        document.getElementById("menuoption"+i).innerHTML = routeinfobeijing[i+pagestep-2];
+                                    break;
+                                    case 1:     //  济南局 2210
+                                        document.getElementById("menuoption"+i).innerHTML = routeinfojinan[i+pagestep-2];
+                                    break;
+                                    case 2:     //  上海局 2220
+                                        document.getElementById("menuoption"+i).innerHTML = routeinfoshanghai[i+pagestep-2];
+                                    break;
+                                    case 3:     //  兰州局 2230
+                                        document.getElementById("menuoption"+i).innerHTML = routeinfolanzhou[i+pagestep-2];
+                                    break;
+                                    case 4:     //  西安局 2240
+                                        document.getElementById("menuoption"+i).innerHTML = routeinfoxian[i+pagestep-2];
+                                    break;
+                                    case 5:     //  武汉局 2250
+                                        document.getElementById("menuoption"+i).innerHTML = routeinfowuhan[i+pagestep-2];
+                                    break;
+                                    case 6:     //  南昌局 2260
+                                        document.getElementById("menuoption"+i).innerHTML = routeinfonanchang[i+pagestep-2];
+                                    break;
+                                    case 7:     //  广州局 2270
+                                        document.getElementById("menuoption"+i).innerHTML = routeinfoguangzhou[i+pagestep-2];
+                                    break;
+                                    case 8:     //  成都局 2280
+                                        document.getElementById("menuoption"+i).innerHTML = routeinfochengdu[i+pagestep-2];
+                                    break;
+                                    }
+                                }
+                                else
+                                {
+                                    switch(Math.floor(mmistate % 100))
+                                    {
+                                        case 11:     //  哈尔滨局 2211
+                                            document.getElementById("menuoption"+i).innerHTML = routeinfohaerbin[i+pagestep-2];
+                                        break;
+                                        case 12:     //  沈阳局 2212
+                                            document.getElementById("menuoption"+i).innerHTML = routeinfoshenyang[i+pagestep-2];
+                                        break;
+                                        case 13:     //  青藏局 2213
+                                            document.getElementById("menuoption"+i).innerHTML = routeinfoqingzang[i+pagestep-2];
+                                        break;
+                                        case 14:     //  太原局 2214
+                                            document.getElementById("menuoption"+i).innerHTML = routeinfotaiyuan[i+pagestep-2];
+                                        break;
+                                        case 15:     //  南宁局 2215
+                                            document.getElementById("menuoption"+i).innerHTML = routeinfonanning[i+pagestep-2];
+                                        break;
+                                        case 16:     //  昆明局 2216
+                                            document.getElementById("menuoption"+i).innerHTML = routeinfokunming[i+pagestep-2];
+                                        break;
+                                        case 17:     //  呼局 2217
+                                            document.getElementById("menuoption"+i).innerHTML = routeinfohuhehaote[i+pagestep-2];
+                                        break;
+                                        case 18:     //  郑州局 2218
+                                            document.getElementById("menuoption"+i).innerHTML = routeinfozhengzhou[i+pagestep-2];
+                                        break;
+                                        case 19:     //  乌鲁木齐局 2219
+                                            document.getElementById("menuoption"+i).innerHTML = routeinfowulumuqi[i+pagestep-2];
+                                        break;
+                                    }
+                                }
+                                
+                            }
+                        }
+                        
+                    }
+                    else if(Math.floor(mmistate / 10) == 22)
+                    {
+                            //alert("shit");
+                        if(segpagecount == 1)
+                        {
+                            document.getElementById("menuoption11").innerHTML = "";
+                            for(var i = 2;i <= 10;i++)
+                                document.getElementById("menuoption"+i).innerHTML = routechoosefill[i+9];
+                            segpagecount = 2;
+                        }
+                            
+                    }
+                    else if(Math.floor(mmistate / 10) == 27)    // 维护界面右翻页
+                    {
+                        pagecount += 1;
+                        pagestep = (pagecount * 10) - 10;
+                        if(pagecount >= 1 && pagecount <=2)
+                        {
+                            for(var i = 1;i <= 11;i++)
+                            {
+                                document.getElementById("menuoption"+i).innerHTML = "";
+                                document.getElementById("menuoption"+i).innerHTML = weihufill[pagestep+i];
+                            }
+                            //document.getElementById("menuoption1").innerHTML = "维护界面：&nbsp&nbsp&nbsp&nbsp" + pagecount + "/3";
+                        }
+                        else if(pagecount == 3)
+                        {
+                            for(var i = 1;i <= 11;i++)
+                            {
+                                document.getElementById("menuoption"+i).innerHTML = "";
+                                document.getElementById("menuoption"+i).innerHTML = weihufill[pagestep+i+1];
+                            }
+                        }
+                    }    
+                    
+                break;
+                case "rt25":
+                        if(mmistate == 0)
+                        {
+                            mmistate = 1;   //副控转主控
+                            //alert(mmiinfo[0]);
+                            document.getElementById("traincodetext").style.color = document.getElementById("loconumtext").style.color = "white";
+                            document.getElementById("traincode").style.color = document.getElementById("lwstate").style.color = "red";
+                            document.getElementById("loconum").style.color = "white";
+                            
+                            for(var i = 1;i <= 8;i++)
+                            {
+                                document.getElementById("calloption"+i).style.color = "white";
+                            }
+
+                            if(document.getElementById("loconum").innerText != weihufill[1].slice(weihufill.length-8,weihufill.length))
+                            {
+                            mmisound.src = "./sound/注意机车号.wav";
+                            mmisound.play();
+                            setTimeout(() => {
+                                document.getElementById("loconumtext").style.color = document.getElementById("loconum").style.color = "red";
+                            }, 1000);
+                            setTimeout(() => {
+                                document.getElementById("loconumtext").style.color = document.getElementById("loconum").style.color = "white";
+                            }, 2000);
+                            setTimeout(() => {
+                                document.getElementById("loconumtext").style.color = document.getElementById("loconum").style.color = "red";
+                            }, 3000);
+                            setTimeout(() => {
+                                document.getElementById("loconumtext").style.color = document.getElementById("loconum").style.color = "white";
+                            }, 4000);
+                            setTimeout(() => {
+                                document.getElementById("loconumtext").style.color = document.getElementById("loconum").style.color = "red";
+                            }, 5000);
+                            }
+                        }
+                            document.getElementById("loconum").innerHTML = document.getElementById("mmijch").value;
+                            document.getElementById("mmijch").value = "";
+                            document.getElementById("mmijch").style.color = "white";
+                            mmiinfo[2] = "0" + document.getElementById("loconum").innerText.slice(document.getElementById("loconum").innerText.length - 4,document.getElementById("loconum").innerText.length);
+                            console.log(mmiinfo[2]);
+
+                        
+                    break;
+                case "rt26":break;
+                case "rt27":        // down key
+                        //alert(menuopcount);
+                        if(mmistate == 20)
+                        {
+                            if(menuopcount == 11)
+                                menuopcount = 1;
+                            else if(menuopcount >= 1 && menuopcount <= 10)
+                                menuopcount += 1;
+                        }
+                        else if(mmistate == 220 || Math.floor(mmistate / 100) == 22)        // 路局运行区段
+                        {
+                            if(menuopcount == 13)
+                                menuopcount = 1;
+                            else if(menuopcount >= 1 && menuopcount <= 12)
+                                menuopcount += 1;
+                        }
+                        else if(mmistate == 300)        //  出入库自检GPRS
+                        {
+                            if(menuopcount == 8)
+                            {
+                                document.getElementById("menuoption8").style.backgroundColor = "#0000cc";
+                                document.getElementById("menuoption8").style.color = "yellow";
+                                menuopcount = 1;
+                            } 
+                            else if(menuopcount >= 1 && menuopcount <= 8)
+                                menuopcount += 1;
+                        }
+                        else if(mmistate == 2700)        //  维护界面选项下移
+                        {
+                            if(menuopcount == 11)
+                            {
+                                document.getElementById("menuoption11").style.backgroundColor = "#0000cc";
+                                document.getElementById("menuoption11").style.color = "yellow";
+                                menuopcount = 1;
+                            } 
+                            else if(menuopcount >= 2 && menuopcount <= 11)
+                                menuopcount += 1;
+                        }
+                        console.log(mmistate);
+                        console.log(menuopcount);
+                        menuoptionlight("down");
+                break;
+                case "rt28":        //  回格
+                        
+                break;
+                case "rt29":break;
+                case "rt30":break;
+                case "rt31":break;
+                case "rt32":        //  退出键
+                    if(mmistate == 300)        // 自检返回
+                    {
+                        for(var i = 1;i <= 8;i++)
+                            document.getElementById("menuoption"+i).innerHTML = checkselffill[i-1];
+                        document.getElementById("menuoption11").innerHTML = "";
+                        document.getElementById("mmimenu").remove();
+                        mmistate = 1;
+                        menuopcount = 1;
+                    }
+                    else
+                    {
+                        document.getElementById("mmimenu").remove();
+                        mmistate = 1;
+                        menuopcount = 1;
+                    }
+                break;
+            }
+        }
+
+        //  draw main interface
+        function maininterfaceinit()
+        {
+            for(var i = 1;i <= 5;i++)
+            {
+                var ifline = document.createElement("div");
+                document.getElementById("mmiscreen").appendChild(ifline);
+                ifline.style.fontSize = Math.floor(mmiheight * 0.024);
+                if(i == 1)  //  first line
+                {
+                    ifline.className = "main-interface-line-1";
+                    for(var j = 1;j <= 5;j++)   //  if need add signal icon, j <= 6 then 
+                    {
+                        var linetext = document.createElement("div");
+                        ifline.appendChild(linetext);
+                        if(j == 1)
+                            linetext.className = "sound-level-icon";
+                        else if(j == 2 || j == 4)
+                        {
+                            linetext.className = "train-code";
+                            if(j == 2)
+                            {
+                                linetext.innerHTML = "车次号：";
+                                linetext.id = "traincodetext";
+                            }
+
+                            else
+                            {
+                                linetext.innerHTML = "机车号：";
+                                linetext.id = "loconumtext";
+                            }
+
+                        }
+                        else
+                        {
+                            linetext.className = "loco-num";
+                            if(j == 3)
+                            {
+                                linetext.innerHTML = "未知";
+                                linetext.id = "traincode";
+                            }
+
+                            else
+                            {
+                                linetext.innerHTML = "不确定";
+                                linetext.style.color = "black";
+                                linetext.id = "loconum";
+                                
+                            }
+                        }
+                        linetext.style.color = "black";       
+                    }
+                }
+                else if(i == 2)     // second line
+                {
+                    ifline.className = "main-interface-line-2";
+                    ifline.id = "maininterfaceline2";
+                    for(var j = 1;j <= 4;j++)
+                    {
+                        var linetext = document.createElement("div");
+                        ifline.appendChild(linetext);
+                        if(j == 1 || j == 3)
+                        {
+                            linetext.className = "lw-state";
+                            if(j == 1)
+                                linetext.innerHTML = "列尾状态：";
+                            else
+                                linetext.innerHTML = "尾部风压：";
+                        }
+                        else
+                        {
+                            if(j == 2)
+                            {
+                                linetext.className = "loco-num";
+                                linetext.innerHTML = "未连接";
+                                linetext.id = "lwstate";
+                            }
+                            else
+                            {
+                                linetext.innerHTML = "不确定";
+                                linetext.style.color = "black";
+                                linetext.id = "lwfyvalue";
+                            } 
+                        }
+                        linetext.style.color = "black";
+                    }
+                }
+                else if(i == 3)     // third line
+                {
+                    ifline.className = "main-interface-line-3";
+                    for(var j = 1;j <= 8;j++)
+                    {
+                        var line3info = document.createElement("div");
+                        ifline.appendChild(line3info);
+                        line3info.id = "line3info"+j;
+                    }
+                    document.getElementById("line3info1").className = "main-interface-line-3-1";
+                    document.getElementById("line3info2").className = "main-interface-line-3-2";
+                    document.getElementById("line3info3").className = "main-interface-line-3-3";
+                    document.getElementById("line3info4").className = "main-interface-line-3-4";
+                    document.getElementById("line3info5").className = "main-interface-line-3-5";
+                    document.getElementById("line3info6").className = "main-interface-line-3-6";
+                    document.getElementById("line3info7").className = "main-interface-line-3-7";
+                    document.getElementById("line3info8").className = "main-interface-line-3-8";
+                    document.getElementById("line3info2").innerHTML = "LBJ已连接";
+                    //document.getElementById("line3info3").innerHTML = "20:00:10";
+                    //document.getElementById("line3info4").innerHTML = "接收报警信息";
+                    
+                    document.getElementById("line3info6").innerHTML = "自动";
+                    document.getElementById("line3info7").innerHTML = "XX线";
+                    //document.getElementById("line3info8").innerHTML = "GSM-R";
+
+                    document.getElementById("line3info8").remove();
+                }
+                else if(i == 4)     // fouth line
+                {
+                    ifline.className = "main-interface-line-4";
+                    for(var j = 1;j <= 2;j++)
+                    {
+                        var linetext = document.createElement("div");
+                        ifline.appendChild(linetext);
+                        linetext.id = "call"+j;
+                        if(j == 1)
+                        {
+                            //var radiomode = document.createElement("div");
+                            //linetext.appendChild(radiomode);
+                            linetext.className = "radio-mode";
+                            linetext.style.backgroundImage = "url('./IMAGE/led-analog-default.png')";
+                            /*for(var k = 1;k <= 2;k++)
+                            {
+                                var radiolight = document.createElement("div");
+                                radiomode.appendChild(radiolight);
+                                radiolight.className = "radio-light";
+                                radiolight.id = "radiolight"+k;
+                                // waiting add background-image code
+                            }*/
+                        }
+                        else
+                        {
+                            linetext.className = "who-call-me";
+                            // waiting add phone icon and caller infomation
+                        }
+                    }
+                }
+                else        // fifth line
+                {
+                    ifline.className = "main-interface-line-5";
+                    ifline.style.fontSize = Math.floor(mmiheight * 0.028);
+                    for(var i = 1;i <= 8;i++)
+                    {
+                        var calloption = document.createElement("div");
+                        ifline.appendChild(calloption);
+                        calloption.className = "call-option";
+                        calloption.id = "calloption"+i;
+                        if(netstate == 1)
+                            calloption.innerHTML = callmodefill[i-1];
+                        else
+                            calloption.innerHTML = callmodefill[i+7];
+                        calloption.style.color = "gray";
+                    }
+
+                    
+                }
+            }
+            document.getElementById("mmi-title").style.fontSize = Math.floor(mmiheight * 0.04);
+            document.getElementById("line3info1").style.backgroundImage = "url('./IMAGE/lbj-clear.png')";
+            setInterval(() => {
+                document.getElementById("line3info3").innerHTML = getcircurrenttime(3);
+            }, 1000);
+            document.getElementById("call2").style.fontSize = mmiheight * 0.03;
+            
+            /*
+            var shit = document.createElement("div");
+            document.getElementById("line3info1").appendChild(shit);
+            shit.style.width = "100%";
+            shit.style.height = "100%";
+            shit.style.borderRadius = "100%";
+            shit.style.backgroundColor = "yellow";*/
+        }
+
+        // judge mode
+        function getmode(modecode)
+        {
+            if(modecode.charCodeAt(0) <= 57)
+                return trxmode[modecode.charCodeAt(0) - 48];
+            else
+                return trxmode[modecode.charCodeAt(0) - 55];
+        }
+
+        
+        
+    // number read
+    function readnumber(num)
+    {
+            switch(num)
+            {
+                case "0":
+                    mmisound.src = "./sound/0.wav";
+                    mmisound.play();
+                break;
+                case "1":
+                    mmisound.src = "./sound/1.wav";
+                    mmisound.play();
+                break;
+                case "2":
+                    mmisound.src = "./sound/2.wav";
+                    mmisound.play();
+                break;
+                case "3":
+                    mmisound.src = "./sound/3.wav";
+                    mmisound.play();
+                break;
+                case "4":
+                    mmisound.src = "./sound/4.wav";
+                    mmisound.play();
+                break;
+                case "5":
+                    mmisound.src = "./sound/5.wav";
+                    mmisound.play();
+                break;
+                case "6":
+                    mmisound.src = "./sound/6.wav";
+                    mmisound.play();
+                break;
+                case "7":
+                    mmisound.src = "./sound/7.wav";
+                    mmisound.play();
+                break;
+                case "8":
+                    mmisound.src = "./sound/8.wav";
+                    mmisound.play();
+                break;
+                case "9":
+                    mmisound.src = "./sound/9.wav";
+                    mmisound.play();
+                break;
+                case "Z":
+                    mmisound.src = "./sound/直.wav";
+                    mmisound.play();
+                break;
+                case "T":
+                    mmisound.src = "./sound/特.wav";
+                    mmisound.play();
+                break;
+                case "K":
+                    mmisound.src = "./sound/快.wav";
+                    mmisound.play();
+                break;
+                case "X":
+                    mmisound.src = "./sound/行.wav";
+                    mmisound.play();
+                break;
+                case "L":
+                    mmisound.src = "./sound/临.wav";
+                    mmisound.play();
+                break;
+                case "F":
+                    mmisound.src = "./sound/返.wav";
+                    mmisound.play();
+                break;
+                case "D":
+                    mmisound.src = "./sound/动.wav";
+                    mmisound.play();
+                break;
+                case "G":
+                    mmisound.src = "./sound/高.wav";
+                    mmisound.play();
+                break;
+                case "DJ":
+                    mmisound.src = "./sound/动检.wav";
+                    mmisound.play();
+                break;
+                case "C":
+                    mmisound.src = "./sound/城.wav";
+                    mmisound.play();
+                break;
+            }
+    }   
+                    
+    // get page count, fill routeinfo and seginfo
+    function getpagecount(page_type)
+    {
+        //alert(page_type);
+        for(var i = 2;i <= 11;i++)
+        {
+            switch(page_type)
+            {
+                case 0:     //  bejing
+                    pagecount = routeinfobeijing.length / 10;
+                    document.getElementById("menuoption"+i).innerHTML = routeinfobeijing[i-2];
+                break;
+                case 1:     // jinan
+                    pagecount = routeinfojinan.length / 10;
+                    document.getElementById("menuoption"+i).innerHTML = routeinfojinan[i-2];
+                break;
+                case 2:     //  shanghai
+                    pagecount = routeinfoshanghai.length / 10;
+                    document.getElementById("menuoption"+i).innerHTML = routeinfoshanghai[i-2];
+                break;
+                case 3:     //  lanzhou
+                    pagecount = routeinfolanzhou.length / 10;
+                    document.getElementById("menuoption"+i).innerHTML = routeinfolanzhou[i-2];
+                break;
+                case 4:     //  xi'an
+                    pagecount = routeinfoxian.length / 10;
+                    document.getElementById("menuoption"+i).innerHTML = routeinfoxian[i-2];
+                break;  
+                case 5:     // wuhan
+                    pagecount = routeinfowuhan.length / 10;
+                    document.getElementById("menuoption"+i).innerHTML = routeinfowuhan[i-2];
+                break;
+                case 6:     //  nanchang
+                    pagecount = routeinfonanchang.length / 10;
+                    document.getElementById("menuoption"+i).innerHTML = routeinfonanchang[i-2];
+                break; 
+                case 7:     //  guangzhou
+                    pagecount = routeinfoguangzhou.length / 10;
+                    document.getElementById("menuoption"+i).innerHTML = routeinfoguangzhou[i-2];
+                break; 
+                case 8:     //  chengdu
+                    pagecount = routeinfochengdu.length / 10;
+                    document.getElementById("menuoption"+i).innerHTML = routeinfochengdu[i-2];
+                break;
+                case 11:     //  haerbin
+                    pagecount = routeinfohaerbin.length / 10;
+                    document.getElementById("menuoption"+i).innerHTML = routeinfohaerbin[i-2];
+                break;
+                case 12:     //  shenyang
+                    pagecount = routeinfoshenyang.length / 10;
+                    document.getElementById("menuoption"+i).innerHTML = routeinfoshenyang[i-2];
+                break;
+                case 13:     //  qingzang
+                    pagecount = routeinfoqingzang.length / 10;
+                    document.getElementById("menuoption"+i).innerHTML = routeinfoqingzang[i-2];
+                break;
+                case 14:     //  taiyuan
+                    pagecount = routeinfotaiyuan.length / 10;
+                    document.getElementById("menuoption"+i).innerHTML = routeinfotaiyuan[i-2];
+                break;
+                case 15:     //  nanning
+                    pagecount = routeinfonanning.length / 10;
+                    document.getElementById("menuoption"+i).innerHTML = routeinfonanning[i-2];
+                break;
+                case 16:     //  kunming
+                    pagecount = routeinfokunming.length / 10;
+                    document.getElementById("menuoption"+i).innerHTML = routeinfokunming[i-2];
+                break;
+                case 17:     //  huhehaote
+                    pagecount = routeinfohuhehaote.length / 10;
+                    document.getElementById("menuoption"+i).innerHTML = routeinfohuhehaote[i-2];
+                break;
+                case 18:     //  zhengzhou
+                    pagecount = routeinfozhengzhou.length / 10;
+                    document.getElementById("menuoption"+i).innerHTML = routeinfozhengzhou[i-2];
+                break;
+                case 19:     //  wulumuqi
+                    pagecount = routeinfowulumuqi.length / 10;
+                    document.getElementById("menuoption"+i).innerHTML = routeinfowulumuqi[i-2];
+                break;
+            }
+        }
+
+        if(pagecount % 10 != 0)
+        {
+            pagecount += 1;
+            pagecount = Math.floor(pagecount);
+        }
+        document.getElementById("menuoption1").innerHTML = "线路选择：&nbsp&nbsp&nbsp&nbsp&nbsp" + "1/" + pagecount + "页";                                    
+        currentpage = 1;
+    }
+
+    //  get current time
+    function getcircurrenttime(time_type)
+    {
+        var cirtime = new Date();
+        if(time_type == 1)      //  返回YY:MM:DD:hh:mm:ss
+            return cirtime.getFullYear() + "年" + (parseInt(cirtime.getMonth())+1).toString() + "月" + cirtime.getDate() + "日" + cirtime.getHours() + "时" + cirtime.getMinutes() + "分" + cirtime.getSeconds() + "秒" + "（未签收）";
+        else if(time_type == 2)     //  返回hh:mm:ss
+            return cirtime.getHours() + "时" + cirtime.getMinutes() + "分" + cirtime.getSeconds() + "秒";
+        else
+            return cirtime.getHours() + ":" + cirtime.getMinutes() + ":" + cirtime.getSeconds();
+
+    }
+
+    //  save ddml, jlyg, crkjc info
+    function saveinfo(save_type)
+    {
+        var infostep = 14;
+        if(save_type == 1)      //  未签收
+        {
+            infosave[0] += 1;
+            
+            for(var i = 1;i <= 9;i++)
+                infosave.push(document.getElementById("infotext"+infosave[i]).innerText);       //  保存基本数据
+            //console.log(document.getElementById("infotext"+infosave[i]).innerText);
+            if(infosave[0] <= 10)
+            {
+                infosave[infostep + 3] = infosave[infostep + 4] = 1;        //    页码计算
+                document.getElementById("infotext17").innerHTML = infosave[infostep + 3];
+                document.getElementById("infotext19").innerHTML = infosave[infostep + 4];
+            }
+        }
+        else        //  已签收
+        {
+            if(infosave[0] == 1)
+                infosave[14] = document.getElementById("infotext11").innerText;     //  保存签收时间戳
+            else
+                infostep += 10;
+                infosave[infostep] = document.getElementById("infotext11").innerText;     //  保存签收时间戳
+            infosave[infostep + 5] = document.getElementById("infobox2").innerHTML;       //  保存签收信息
+        }
+    }
+    </script>
+</html>

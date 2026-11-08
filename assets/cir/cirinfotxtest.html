@@ -1,0 +1,162 @@
+<html>
+    <head>
+        <title>CIR模拟器信息发送测试</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            body
+            {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                flex-wrap: wrap;
+            }
+
+            h1
+            {
+                margin: 0px;
+            }
+
+            .test-box
+            {
+                display: flex;
+                justify-content: flex-start;
+                flex-wrap: wrap;
+                height: 90%;
+            }
+
+            .check-box
+            {
+                width: 100%;
+                height: 10%;
+            }
+
+            .mlnum
+            {
+                width: 25%;
+                height: 5%;
+            }
+
+            .text-box
+            {
+                width: 100%;
+                height: 40%;
+            }
+        </style>
+    </head>
+
+    <body>
+        <h1>CIR模拟器信息发送测试</h1>
+        <div class = "test-box" id = "testbox">
+            <div class = "check-box">
+                <div>请选择信息类型：</div>
+                <input type="radio" name = "option" class = "check" id = "check1" value = "ddml">调度命令
+                <input type="radio" name = "option" class = "check" id = "check2" value = "jlyg">列车进路预告
+                <input type="radio" name = "option" class = "check" id = "check3" value = "ldqr">列尾待确认
+                <input type="radio" name = "option" class = "check" id = "check4" value = "ldld">列尾电量低
+            </div>
+            <div class = "">调度命令号：</div>
+            <input type="text" class = "mlnum" id = "info1">
+            <div>发令人：</div>
+            <input type="text"  class = "mlnum" id = "info2">
+            <div>发令处所：</div>
+            <input type="text"  class = "mlnum" id = "info3">
+            <div>发令时间：</div>
+            <input type="text"  class = "mlnum" id = "info4" disabled = "true">
+            <div>下达车次：</div>
+            <input type="text"  class = "mlnum" id = "info5">
+            <div style = "width: 60%;">命令内容：</div>
+            <textarea name="mltext"  class = "text-box" id="info6"></textarea>
+            <div style = "width: 100%;height: 5%;display: flex;justify-content: left;align-items: center;" id = "tipinfo"></div>
+            <button id = "sdbutton">  发  送  </button>
+        </div>
+    </body>
+
+    <script>
+        var testheight = window.innerHeight;
+        var infotmp = "";
+        document.getElementById("testbox").style.width = testheight * 0.56;
+
+        // 1. 创建相同的广播通道
+        const channel = new BroadcastChannel('my_communication_channel');
+
+        // 2. 发送逻辑
+        
+        document.getElementById("sdbutton").addEventListener('click', () => {
+            //const text = msgInput.value;
+            infoget();
+            if (!infotmp) return alert('请输入内容');
+
+            
+            
+            channel.postMessage(infotmp);
+            document.getElementById("button").disabled = true;
+            infotip(1,'已发送，等待签收...');
+            
+        });
+
+        // 3. 接收回复逻辑
+        channel.onmessage = (event) => {
+            if (event.data === 'success info') {
+                infotip(1,'司机已签收...');
+                document.getElementById("button").disabled = false;
+                document.getElementById("check1").disabled = false;
+                document.getElementById("check2").disabled = false;
+                setTimeout(() => {
+                    infotip(3,"");
+                }, 3000);
+            }
+        };
+
+        window.addEventListener('beforeunload', () => {
+            channel.close();
+        });
+
+        function infoget()
+        {
+            //const text = msgInput.value;
+            document.getElementById("info4").disabled = false;
+            infotmp = "";
+
+            if(document.getElementById("check1").checked)
+                infotmp = "ddml";
+            else if(document.getElementById("check2").checked)
+                infotmp = "jlyg";
+            else if(document.getElementById("check3").checked)
+                infotmp = "ldqr";
+            else if(document.getElementById("check4").checked)
+                infotmp = "ldld";
+
+            infotmp += "@";
+
+            var txtime = new Date();
+
+            document.getElementById("info4").value = txtime.getFullYear()+"年"+txtime.getMonth()+"月"+txtime.getDate()+"日"+txtime.getHours()+"时"+txtime.getMinutes()+"分"+txtime.getSeconds()+"秒";
+            
+            for(var i = 1;i <= 6;i++)
+            {
+                if(i > 1)
+                    infotmp += "@"+ document.getElementById("info"+i).value;
+                else
+                    infotmp += document.getElementById("info"+i).value;
+            }
+        }
+
+        function infotip(tip_type, tip_text)
+        {
+            if(tip_type == 1)
+            {
+                document.getElementById("tipinfo").style.backgroundColor = "lightgreen";
+
+            }
+            else if(tip_type == 2)
+            {
+                document.getElementById("tipinfo").style.backgroundColor = "red";
+            }
+            else
+                document.getElementById("tipinfo").style.backgroundColor = "white";
+
+            document.getElementById("tipinfo").innerHTML = tip_text;
+        }
+    </script>
+</html>

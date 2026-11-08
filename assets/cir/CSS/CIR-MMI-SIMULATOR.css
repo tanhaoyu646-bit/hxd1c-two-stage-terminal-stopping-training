@@ -1,0 +1,423 @@
+body
+{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+
+    background-color: black;
+    color: white;
+}
+
+.mmi-body
+{
+    display: flex;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+
+}
+
+.mmi-left
+{
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+
+    margin-left: 6.8%;
+
+    width: 53%;
+    height: 89%;
+
+}
+
+.mmi-name
+{
+    display: flex;
+    justify-content: flex-start;
+    align-items: end;
+
+    width: 100%;
+    height: 10%;
+
+    text-align: center;
+}
+
+.mmi-mo
+{
+    display: flex;
+    justify-content: center;
+    align-items: end;
+
+    width: 99%;
+    height: 69%;
+
+}
+.mmi-screen
+{
+    margin-bottom: 2%;
+
+    width: 88%;
+    height: 88%;
+
+    border: 2px ridge gray;
+    border-radius: 10px;
+}
+
+.mmi-button-tips
+{
+
+}
+
+.mmi-buttom-button
+{
+    display: flex;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+
+    width: 88%;
+    height: 18%;
+
+
+}
+
+.bottom-button
+{
+    margin-bottom: 3%;
+
+    width: 8.5%;
+    height: 41%;
+
+    border: 2px solid white;
+    border-radius: 10px;
+
+    background-color: gray;
+    background-repeat: no-repeat;
+    background-size: cover;
+    box-shadow: inset 0 0 18px #340285;
+}
+
+.mmi-right
+{
+    margin-top: 7.6%;
+    margin-left: 2.9%;
+
+    width: 25%;
+    height: 78%;
+
+
+}
+
+.mmi-right-button
+{
+    display: flex;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+
+    width: 100%;
+    height: 100%;
+
+
+}
+
+.right-button
+{
+    margin-bottom: 3%;
+
+    width: 18%;
+    height: 9%;
+
+    border: 2px solid white;
+    border-radius: 10px;
+
+    background-color: gray;
+    background-repeat: no-repeat;
+    background-size: cover;
+    box-shadow: inset 0 0 18px #340285;
+}
+
+.main-interface-line-1
+{
+    display: flex;
+    justify-content: flex-start;
+
+    width: 100%;
+    height: 12%;
+
+    background-color: #0000fe;
+}
+
+.sound-level-icon
+{
+    width: 13%;
+    height: 100%;
+}
+
+.train-code
+{
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    width: 15%;
+    height: 100%;
+}
+
+.loco-num
+{
+    display: flex;
+    justify-content: left;
+    align-items: center;
+
+    width: 24%;
+    height: 100%;
+
+    color: red;
+    text-align: left;
+    align-items: center;
+}
+
+.main-interface-line-2
+{
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+
+    width: 100%;
+    height: 12%;
+
+    background-color: #808080;
+    border-top: 2px solid black;
+}
+
+.lw-state
+{
+    width: 18%;
+    color: black;
+    
+}
+
+.main-interface-line-3
+{
+    display: flex;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+
+    width: 100%;
+    height: 42%;
+}
+
+.main-interface-line-3-1
+{
+    width: 4.5%;
+    height: 13%;
+
+    background-repeat: no-repeat;
+    background-size: contain;
+
+
+}
+
+.main-interface-line-3-2
+{
+    width: 20%;
+    height: 18%;
+
+    color: yellow;
+
+}
+
+.main-interface-line-3-3
+{
+    width: 72%;
+    height: 18%;
+
+    text-align: right;
+    color: yellow;
+
+}
+
+.main-interface-line-3-4
+{
+    width: 100%;
+    height: 45%;
+
+    color: red;
+    text-align: center;
+    white-space: pre-wrap;
+}
+
+.main-interface-line-3-5
+{
+    width: 100%;
+    height: 18%;
+
+    text-align: center;
+    color: yellow;
+
+}
+
+.main-interface-line-3-6
+{
+    width: 12%;
+    height: 18%;
+
+    color: yellow;
+    text-align: center;
+
+}
+
+.main-interface-line-3-7
+{
+    display: flex;
+    justify-content: flex-start;
+
+    width: 70%;
+    height: 18%;
+
+    color: #00ecec;
+    text-align: center;
+
+}
+
+.main-interface-line-3-8
+{
+    width: 20%;
+    height: 18%;
+
+    color: green;
+    text-align: center;
+
+}
+
+.main-interface-line-4
+{
+    display: flex;
+    justify-content: flex-start;
+
+    width: 100%;
+    height: 18%;
+
+    background-color: #808080;
+}
+
+.radio-mode
+{
+    width: 26%;
+    height: 100%;
+
+    
+    background-size: cover;
+    background-repeat: no-repeat;
+
+    border-right: 2px solid black;
+}
+
+.radio-light
+{
+    width: 100%;
+    height: 50%;
+
+    border-right: 2px solid black;
+}
+
+.who-call-me
+{
+    width: 72%;
+    height: 100%;
+
+    color: black;
+
+    font-family: '宋体';
+}
+
+.main-interface-line-5
+{
+    display: flex;
+    justify-content: space-between;
+
+    width: 100%;
+    height: 15%;
+}
+
+.call-option
+{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-right: 1%;
+
+    width: 11%;
+    height: 99%;
+
+    border: 2px solid white;
+    background-color: #0000fe;
+    color: white;
+}
+
+.mmi-menu
+{
+    position: relative;
+    display: flex;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+
+    margin-top: -76%;
+
+    width: 100%;
+    height: 100%;
+
+    background-color: black;
+
+}
+
+.menu-option
+{
+    display: flex;
+    justify-content: flex-start;
+
+    margin-left: 2.7%;
+
+    width: 93%;
+    height: 8.3%;
+
+    background-color: #0000cc;
+    color: yellow;
+}
+
+.train-code-tip
+{
+    color: #00ecec;
+}
+
+.train-code-input
+{
+    width: 15%;
+    height: 100%;
+
+    background-color: black;
+    color: #00ecec;
+    border: none;
+
+    outline: 0px;
+}
+
+.infomation-box
+{
+    display: flex;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+
+    width: 100%;
+    height: 28%;
+
+    background-color: rgb(0, 0, 253);
+}
+
+.infomation-box1
+{
+    display: flex;
+    justify-content: flex-start;
+    
+    width: 100%;
+    height: 72%;
+    white-space: pre-wrap;
+}
