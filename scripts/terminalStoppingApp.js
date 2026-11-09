@@ -1,7 +1,7 @@
 import { CAB, PROJECT_ID, SCENARIO, TRACTION_MAX } from './terminalStoppingConfig.js?v=two-stage-3';
 import { TerminalStoppingSimulation } from './terminalStoppingSimulation.js?v=two-stage-3';
 import { TerminalStoppingAssessment } from './terminalStoppingAssessment.js?v=two-stage-3';
-import { TerminalStoppingScene } from './terminalStoppingScene.js?v=two-stage-3';
+import { TerminalStoppingScene } from './terminalStoppingScene.js?v=two-stage-4';
 import { LkjRuntime } from './lkjRuntime.js?v=two-stage-3';
 import { CirRuntime } from './cirRuntime.js?v=two-stage-3';
 import {

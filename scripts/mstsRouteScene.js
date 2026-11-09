@@ -46,6 +46,24 @@ const TERMINAL_STATION_RENDER_OPTIONS = Object.freeze({
   sourceDepartureSignal: false,
 });
 
+// 中车公开参数：HXD1C 单节车体 21.885 m、前后车钩中心距 22.670 m、
+// 车体宽 3.100 m、六轴。模型以司机侧窗纵向中心为 z=0，停车标和评分
+// 也使用同一司机参考点，确保右后外部视角与驾驶室视角的对标关系一致。
+const HXD1C_EXTERIOR = Object.freeze({
+  bodyLength: 21.885,
+  couplerLength: 22.67,
+  bodyWidth: 3.1,
+  bodyHeight: 4.05,
+  driverWindowFromFront: 2.6,
+  passengerCarSpacing: 25.8,
+});
+const HXD1C_COUPLER_OVERHANG = (HXD1C_EXTERIOR.couplerLength - HXD1C_EXTERIOR.bodyLength) / 2;
+const HXD1C_REAR_COUPLER_BEHIND_DRIVER = HXD1C_EXTERIOR.couplerLength
+  - HXD1C_EXTERIOR.driverWindowFromFront
+  - HXD1C_COUPLER_OVERHANG;
+const FIRST_PASSENGER_CAR_BEHIND_DRIVER = HXD1C_REAR_COUPLER_BEHIND_DRIVER
+  + HXD1C_EXTERIOR.passengerCarSpacing / 2;
+
 // 电分相考核使用独立、按教学里程布置的标志。原线路在同一走廊内还带有
 // 既有断电牌、禁止双弓牌、曲线牌和信号机，若同时渲染会造成重复和错序。
 const POWER_TRAINING_SUPPRESSED_SHAPES = /^(?:duan|jinzhi-shuanggong|quxianbiao|qiaoliangbiao)\.s$/i;
@@ -97,6 +115,8 @@ export class MstsRouteScene {
     this.throughSignal = null;
     this.throughSignals = [];
     this.passengerCars = [];
+    this.locomotiveExterior = null;
+    this.locomotiveDriverWindowAnchor = null;
     this.lookoutRoot = null;
     this.lookoutVisuals = {};
     this.railVisibilityMaterials = [];
@@ -174,6 +194,7 @@ export class MstsRouteScene {
       }
       this.buildTerrain(terrainData);
       this.buildRoute(sceneData);
+      this.buildLocomotiveExterior();
       this.buildPassengerConsist(12);
       // 瞭望项目的本务主线在加载时一次性生成到 TrackDB 路径终点。
       // 课程仍在6 km结算，但不再因考核终点人为截断三维钢轨。
@@ -585,15 +606,130 @@ export class MstsRouteScene {
         bogie.position.set(0, 0.22, bogieZ);
         car.add(bogie);
       }
-      // 以司机视点为列车前端参考。HXD1C 车体与连挂间距计入首辆客车中心距，
-      // 避免后部瞭望镜头落入第一辆客车端面。
-      car.userData.trainOffset = 33 + index * 25.8;
+      // 终到停车项目以司机侧窗为参考，首辆客车位置由 HXD1C 后车钩位置
+      // 和客车中心距推导；其他项目保留原有 33 m 基线，避免无关回归。
+      const firstCarOffset = this.isTerminalStation ? FIRST_PASSENGER_CAR_BEHIND_DRIVER : 33;
+      car.userData.trainOffset = firstCarOffset + index * HXD1C_EXTERIOR.passengerCarSpacing;
       car.userData.consistIndex = index;
       car.userData.consistCount = count;
       this.routeRoot.add(car);
       this.passengerCars.push(car);
     }
     this.updatePassengerConsist();
+  }
+
+  buildLocomotiveExterior() {
+    if (!this.isTerminalStation || this.locomotiveExterior) return;
+    const root = new THREE.Group();
+    root.name = 'HXD1C_LIGHTWEIGHT_EXTERIOR';
+    const bodyCenterZ = HXD1C_EXTERIOR.driverWindowFromFront - HXD1C_EXTERIOR.bodyLength / 2;
+    const rearWindowZ = bodyCenterZ * 2;
+    const bodyFrontZ = HXD1C_EXTERIOR.driverWindowFromFront;
+    const bodyRearZ = bodyFrontZ - HXD1C_EXTERIOR.bodyLength;
+
+    const blue = new THREE.MeshStandardMaterial({ color: '#17619a', roughness: 0.64, metalness: 0.24 });
+    const blueDark = new THREE.MeshStandardMaterial({ color: '#0b3556', roughness: 0.72, metalness: 0.22 });
+    const silver = new THREE.MeshStandardMaterial({ color: '#d6dde0', roughness: 0.62, metalness: 0.28 });
+    const roofMaterial = new THREE.MeshStandardMaterial({ color: '#707b80', roughness: 0.8, metalness: 0.34 });
+    const underframe = new THREE.MeshStandardMaterial({ color: '#20282b', roughness: 0.86, metalness: 0.42 });
+    const wheelMaterial = new THREE.MeshStandardMaterial({ color: '#303638', roughness: 0.78, metalness: 0.58 });
+    const windowMaterial = new THREE.MeshStandardMaterial({
+      color: '#122936', roughness: 0.18, metalness: 0.18, emissive: '#0b2432', emissiveIntensity: 0.4,
+    });
+    const red = new THREE.MeshStandardMaterial({ color: '#a63b32', roughness: 0.68, metalness: 0.24 });
+    const white = new THREE.MeshStandardMaterial({ color: '#edf2f2', roughness: 0.7, metalness: 0.14 });
+
+    const addBox = (name, size, position, material, rotation = null) => {
+      const mesh = new THREE.Mesh(new THREE.BoxGeometry(...size), material);
+      mesh.name = name;
+      mesh.position.set(...position);
+      if (rotation) mesh.rotation.set(...rotation);
+      root.add(mesh);
+      return mesh;
+    };
+    const addRod = (name, start, end, radius, material) => {
+      const from = new THREE.Vector3(...start);
+      const to = new THREE.Vector3(...end);
+      const direction = to.clone().sub(from);
+      const mesh = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius, direction.length(), 6), material);
+      mesh.name = name;
+      mesh.position.copy(from).add(to).multiplyScalar(0.5);
+      mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction.normalize());
+      root.add(mesh);
+      return mesh;
+    };
+
+    addBox('HXD1C_BODY', [HXD1C_EXTERIOR.bodyWidth, 3.05, HXD1C_EXTERIOR.bodyLength], [0, 2.55, bodyCenterZ], blue);
+    addBox('HXD1C_LOWER_SKIRT', [3.14, 0.68, 21.55], [0, 1.18, bodyCenterZ], blueDark);
+    addBox('HXD1C_ROOF', [2.92, 0.26, 20.9], [0, 4.19, bodyCenterZ], roofMaterial);
+    addBox('HXD1C_UNDERFRAME', [2.72, 0.52, 20.85], [0, 0.72, bodyCenterZ], underframe);
+    for (const side of [-1, 1]) {
+      addBox(`HXD1C_SILVER_PANEL_${side}`, [0.045, 1.22, 13.2], [side * 1.565, 2.82, bodyCenterZ], silver);
+      addBox(`HXD1C_BLUE_STRIPE_${side}`, [0.052, 0.3, 20.8], [side * 1.572, 2.02, bodyCenterZ], blueDark);
+      for (const [index, windowZ] of [0, rearWindowZ].entries()) {
+        addBox(`HXD1C_CAB_SIDE_WINDOW_${side}_${index}`, [0.06, 0.92, 1.42], [side * 1.585, 3.34, windowZ], windowMaterial);
+        addBox(`HXD1C_CAB_WINDOW_SILL_${side}_${index}`, [0.075, 0.08, 1.55], [side * 1.59, 2.84, windowZ], silver);
+      }
+      for (let index = 0; index < 4; index += 1) {
+        addBox(`HXD1C_VENT_${side}_${index}`, [0.06, 1.02, 1.65], [side * 1.587, 3.0, -5.1 - index * 2.45], blueDark);
+      }
+      addBox(`HXD1C_HARMONY_MARK_${side}`, [0.065, 0.44, 3.5], [side * 1.59, 2.76, -8.3], white);
+    }
+    for (const endZ of [bodyFrontZ + 0.025, bodyRearZ - 0.025]) {
+      for (const x of [-0.76, 0.76]) addBox(`HXD1C_FRONT_WINDOW_${endZ}_${x}`, [1.12, 0.78, 0.06], [x, 3.42, endZ], windowMaterial);
+      addBox(`HXD1C_END_BAND_${endZ}`, [2.6, 0.3, 0.075], [0, 2.13, endZ], silver);
+    }
+
+    const bogieCenters = [bodyCenterZ + 5.05, bodyCenterZ - 5.05];
+    bogieCenters.forEach((bogieZ, bogieIndex) => {
+      addBox(`HXD1C_BOGIE_${bogieIndex}`, [2.72, 0.48, 5.5], [0, 0.58, bogieZ], underframe);
+      [-1.72, 0, 1.72].forEach((axleOffset, axleIndex) => {
+        for (const side of [-1, 1]) {
+          const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.625, 0.625, 0.24, 14), wheelMaterial);
+          wheel.name = `HXD1C_WHEEL_${bogieIndex}_${axleIndex}_${side}`;
+          wheel.position.set(side * 1.34, 0.63, bogieZ + axleOffset);
+          wheel.rotation.z = Math.PI / 2;
+          root.add(wheel);
+        }
+      });
+    });
+
+    const frontCouplerZ = bodyFrontZ + HXD1C_COUPLER_OVERHANG;
+    const rearCouplerZ = bodyRearZ - HXD1C_COUPLER_OVERHANG;
+    for (const couplerZ of [frontCouplerZ, rearCouplerZ]) {
+      addBox(`HXD1C_COUPLER_${couplerZ}`, [0.52, 0.34, 0.82], [0, 0.94, couplerZ], underframe);
+    }
+
+    for (const [index, pantographZ] of [-4.65, -12.05].entries()) {
+      addBox(`HXD1C_PANTO_BASE_${index}`, [1.35, 0.15, 1.65], [0, 4.4, pantographZ], roofMaterial);
+      addRod(`HXD1C_PANTO_LEFT_${index}`, [-0.55, 4.48, pantographZ + 0.55], [0.34, 5.52, pantographZ - 0.5], 0.045, red);
+      addRod(`HXD1C_PANTO_RIGHT_${index}`, [0.55, 4.48, pantographZ + 0.55], [-0.34, 5.52, pantographZ - 0.5], 0.045, red);
+      addRod(`HXD1C_PANTO_UPPER_LEFT_${index}`, [0.34, 5.52, pantographZ - 0.5], [-0.58, 5.86, pantographZ + 0.18], 0.04, red);
+      addRod(`HXD1C_PANTO_UPPER_RIGHT_${index}`, [-0.34, 5.52, pantographZ - 0.5], [0.58, 5.86, pantographZ + 0.18], 0.04, red);
+      addBox(`HXD1C_PANTO_STRIP_${index}`, [1.75, 0.07, 0.12], [0, 5.9, pantographZ + 0.18], red);
+    }
+
+    const driverAnchor = new THREE.Object3D();
+    driverAnchor.name = 'HXD1C_DRIVER_RIGHT_WINDOW_REFERENCE';
+    driverAnchor.position.set(-HXD1C_EXTERIOR.bodyWidth / 2, 3.34, 0);
+    root.add(driverAnchor);
+    root.userData.driverWindowLocalZ = 0;
+    root.userData.bodyLength = HXD1C_EXTERIOR.bodyLength;
+    root.userData.couplerLength = HXD1C_EXTERIOR.couplerLength;
+    root.visible = false;
+    this.routeRoot.add(root);
+    this.locomotiveExterior = root;
+    this.locomotiveDriverWindowAnchor = driverAnchor;
+    this.updateLocomotiveExterior();
+  }
+
+  updateLocomotiveExterior() {
+    if (!this.locomotiveExterior || !this.routePoints.length) return;
+    const routeDistance = this.startOffset + this.distance;
+    const frame = this.getLookoutPathFrame3D(routeDistance);
+    this.locomotiveExterior.position.copy(frame.point);
+    this.locomotiveExterior.quaternion.copy(frame.quaternion);
+    this.locomotiveExterior.visible = this.view === 'rearLeft' || this.view === 'rearRight';
   }
 
   getExtendedPathPosition(distance, target = new THREE.Vector3()) {
@@ -1772,6 +1908,7 @@ export class MstsRouteScene {
 
   setView(view) {
     this.view = view;
+    this.updateLocomotiveExterior();
     this.applyCamera();
   }
 
@@ -1785,6 +1922,7 @@ export class MstsRouteScene {
     this.view = view;
     this.canvas.classList.toggle('live', this.ready && (this.distance > 0.2 || view !== 'front' || signalVisible));
     this.updateAtmosphere();
+    this.updateLocomotiveExterior();
     this.updatePassengerConsist(this.wholeTrainStartFraction);
     this.applyCamera();
     this.updateSignalTeachingVisibility();
@@ -1793,6 +1931,25 @@ export class MstsRouteScene {
   applyCamera() {
     const routeDistance = this.startOffset + this.distance;
     const position = this.getPathPosition(routeDistance);
+    const rearExternal = this.view === 'rearLeft' || this.view === 'rearRight';
+    if (rearExternal && this.routePoints.length) {
+      const side = this.view === 'rearRight' ? -1 : 1;
+      // 车外镜头位于司机窗后方并接近正侧面。这样既能展示机车、客车编组，
+      // 又能把同一横断面上的停车标与司机侧窗清楚地投影到一起，避免大斜角
+      // 透视造成“坐标正确但画面看似错位”。
+      const frame = this.getLookoutPathFrame3D(Math.max(0, routeDistance - 9.2));
+      const targetFrame = this.getLookoutPathFrame3D(Math.max(0, routeDistance - 7.0));
+      this.camera.position.copy(frame.point)
+        .addScaledVector(frame.right, side * 16)
+        .addScaledVector(frame.up, 4.55);
+      const target = targetFrame.point.clone()
+        .addScaledVector(targetFrame.right, side * 0.1)
+        .addScaledVector(targetFrame.up, 2.65);
+      this.camera.up.copy(frame.up);
+      this.camera.lookAt(target);
+      if (this.ground) this.ground.position.set(position.x, position.y - 0.18, position.z);
+      return;
+    }
     const tangentStart = this.getPathPosition(Math.max(0, routeDistance - 3));
     const tangentEnd = this.getPathPosition(Math.min(this.pathLength || routeDistance + 6, routeDistance + 6));
     const tangent = tangentEnd.sub(tangentStart);

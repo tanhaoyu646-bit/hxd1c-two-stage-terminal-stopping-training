@@ -260,3 +260,19 @@ test('手机端、LKJ、操作台和后部瞭望保留已验收逻辑', () => {
   assert.match(html, /data-mobile-command="cir"/);
   assert.match(html, /左后部瞭望/);
 });
+
+test('右后外部视角以HXD1C司机侧窗作为停车标空间基准', () => {
+  const source = readFileSync(new URL('../scripts/mstsRouteScene.js', import.meta.url), 'utf8');
+  const stoppingScene = readFileSync(new URL('../scripts/terminalStoppingScene.js', import.meta.url), 'utf8');
+  assert.match(source, /bodyLength:\s*21\.885/);
+  assert.match(source, /couplerLength:\s*22\.67/);
+  assert.match(source, /bodyWidth:\s*3\.1/);
+  assert.match(source, /HXD1C_LIGHTWEIGHT_EXTERIOR/);
+  assert.match(source, /HXD1C_DRIVER_RIGHT_WINDOW_REFERENCE/);
+  assert.match(source, /driverWindowLocalZ\s*=\s*0/);
+  assert.match(source, /FIRST_PASSENGER_CAR_BEHIND_DRIVER/);
+  assert.match(source, /rearExternal\s*=\s*this\.view === 'rearLeft' \|\| this\.view === 'rearRight'/);
+  assert.match(source, /this\.view === 'rearRight' \? -1 : 1/);
+  assert.match(source, /locomotiveExterior\.visible = this\.view === 'rearLeft' \|\| this\.view === 'rearRight'/);
+  assert.match(stoppingScene, /scenario\.startOffset \+ scenario\.targetDistance, -3\.25/);
+});
