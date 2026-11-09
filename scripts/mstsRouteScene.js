@@ -7,8 +7,8 @@ import { LOOKOUT_TRAINING_CONFIG } from './lookoutTrainingConfig.js';
 // 因此所有三维资源必须相对 import.meta.url 解析，不能使用普通 ../assets 字符串。
 const SOURCE_PATH = new URL('../assets/msts-neiyi-corridor/neiyi-lookout-full-scene.json', import.meta.url).href;
 const ROUTE_PATH = new URL('../assets/msts-neiyi/neiyi-5635-trackdb-path.json', import.meta.url).href;
-const TERMINAL_STATION_SOURCE_PATH = new URL('../assets/msts-neiyi-corridor/neiyi-dashanpu-terminal-scene.json?v=two-stage-2', import.meta.url).href;
-const TERMINAL_STATION_ROUTE_PATH = new URL('../assets/msts-neiyi/neiyi-5635-trackdb-path-aligned.json?v=two-stage-2', import.meta.url).href;
+const TERMINAL_STATION_SOURCE_PATH = new URL('../assets/msts-neiyi-corridor/neiyi-dashanpu-terminal-scene.json?v=two-stage-3', import.meta.url).href;
+const TERMINAL_STATION_ROUTE_PATH = new URL('../assets/msts-neiyi/neiyi-5635-trackdb-path-aligned.json?v=two-stage-3', import.meta.url).href;
 const TERRAIN_PATH = new URL('../assets/msts-neiyi-corridor/neiyi-lookout-terrain.json', import.meta.url).href;
 const LOOKOUT_TERRAIN_PATH = new URL('../assets/msts-neiyi-corridor/neiyi-lookout-terrain-native.json', import.meta.url).href;
 const TERMINAL_STATION_TERRAIN_PATH = new URL('../assets/msts-neiyi-corridor/neiyi-dashanpu-terrain-native.json', import.meta.url).href;

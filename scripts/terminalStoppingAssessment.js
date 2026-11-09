@@ -1,21 +1,22 @@
-import { SCENARIO, brakingDistanceForSpeed } from './terminalStoppingConfig.js?v=two-stage-2';
+import { SCENARIO, brakingDistanceForSpeed } from './terminalStoppingConfig.js?v=two-stage-3';
 
 const between = (value, min, max) => Number.isFinite(value) && value >= min && value <= max;
+const displayedBetween = (value, min, max) => Number.isFinite(value) && Math.round(value) >= min && Math.round(value) <= max;
 const clampScore = (value, maximum) => Math.max(0, Math.min(maximum, Math.round(value)));
 
 function tractionRelease(events, firstBrake) {
-  if (!firstBrake) return { correctOrder: false, delayed: false, progressive: false, zero: null };
+  if (!firstBrake) return { correctOrder: false, delayed: false, progressive: false, target: null };
   const changes = events.filter((event) => event.type === 'traction' && event.elapsed >= firstBrake.elapsed);
   const reductions = changes.filter((event) => Number(event.previous?.traction) > Number(event.value) && Number(event.value) >= 0);
   const firstReduction = reductions[0] || null;
-  const zero = changes.find((event) => event.value === 0) || null;
-  const throughZero = zero ? reductions.filter((event) => event.elapsed <= zero.elapsed) : [];
-  const progressive = Boolean(zero && throughZero.length && throughZero.every((event) => Number(event.previous?.traction) - Number(event.value) === 1));
+  const target = changes.find((event) => Number(event.value) <= 1) || null;
+  const throughTarget = target ? reductions.filter((event) => event.elapsed <= target.elapsed) : [];
+  const progressive = Boolean(target && throughTarget.length && throughTarget.every((event) => Number(event.previous?.traction) - Number(event.value) === 1));
   return {
-    correctOrder: Number(firstBrake.traction) > 0 && Boolean(firstReduction && zero),
+    correctOrder: Number(firstBrake.traction) > 1 && Boolean(firstReduction && target),
     delayed: Boolean(firstReduction && firstReduction.elapsed - firstBrake.elapsed >= SCENARIO.tractionReleaseDelay),
     progressive,
-    zero,
+    target,
   };
 }
 
@@ -25,16 +26,25 @@ function twoStageEvents(events) {
   const secondBrake = applications.find((event) => event.ordinal === 2) || null;
   const firstRelease = events.find((event) => event.type === 'brake-release' && event.ordinal === 1) || null;
   const charged = events.find((event) => event.type === 'brake-pipe-charged') || null;
-  const tailQueries = events.filter((event) => event.type === 'cir-action' && event.action?.type === 'tail-query');
-  const tailQuery = tailQueries.find((event) => firstRelease && event.elapsed > firstRelease.elapsed && (!secondBrake || event.elapsed < secondBrake.elapsed)) || null;
+  const firstReleaseIndex = firstRelease ? events.indexOf(firstRelease) : -1;
+  const secondBrakeIndex = secondBrake ? events.indexOf(secondBrake) : events.length;
+  const tailQuery = events.find((event, index) => event.type === 'cir-action'
+    && event.action?.type === 'tail-query'
+    && firstReleaseIndex >= 0
+    && index > firstReleaseIndex
+    && index < secondBrakeIndex) || null;
+  const queryPressure = Number(tailQuery?.action?.pressure);
   const tailQueryValid = Boolean(tailQuery
-    && tailQuery.action.pressure >= SCENARIO.tailQueryMinimumPressure
-    && Math.abs(tailQuery.trainPipe - tailQuery.action.pressure) <= SCENARIO.tailQueryMaximumDifference);
-  const cruiseNotch = events.find((event) => event.type === 'traction'
-    && event.value === 1
-    && firstRelease
-    && event.elapsed >= firstRelease.elapsed
-    && (!secondBrake || event.elapsed < secondBrake.elapsed)) || null;
+    && Number.isFinite(queryPressure)
+    && queryPressure >= SCENARIO.tailQueryMinimumPressure
+    && Math.abs(Number(tailQuery.trainPipe) - queryPressure) <= SCENARIO.tailQueryMaximumDifference);
+  const cruiseNotch = firstRelease?.traction === 1
+    ? firstRelease
+    : events.find((event, index) => event.type === 'traction'
+      && event.value === 1
+      && firstReleaseIndex >= 0
+      && index > firstReleaseIndex
+      && index < secondBrakeIndex) || null;
   return { applications, firstBrake, secondBrake, firstRelease, charged, tailQuery, tailQueryValid, cruiseNotch };
 }
 
@@ -50,7 +60,7 @@ export class TerminalStoppingAssessment {
       events.some((event) => event.type === 'callout'),
       release.correctOrder && release.delayed && release.progressive,
       Boolean(stage.firstBrake),
-      Boolean(stage.firstRelease && between(stage.firstRelease.speed, SCENARIO.firstReleaseMinimumSpeed, SCENARIO.firstReleaseMaximumSpeed)),
+      Boolean(stage.firstRelease && displayedBetween(stage.firstRelease.speed, SCENARIO.firstReleaseMinimumSpeed, SCENARIO.firstReleaseMaximumSpeed)),
       Boolean(stage.charged),
       Boolean(stage.cruiseNotch),
       stage.tailQueryValid,
@@ -89,7 +99,7 @@ export class TerminalStoppingAssessment {
     if (stage.firstBrake && stage.firstBrake.value !== 1) firstStage -= 4;
 
     let releaseAndCharge = 20;
-    if (!stage.firstRelease || !between(stage.firstRelease.speed, SCENARIO.firstReleaseMinimumSpeed, SCENARIO.firstReleaseMaximumSpeed)) releaseAndCharge -= 8;
+    if (!stage.firstRelease || !displayedBetween(stage.firstRelease.speed, SCENARIO.firstReleaseMinimumSpeed, SCENARIO.firstReleaseMaximumSpeed)) releaseAndCharge -= 8;
     if (!stage.charged || (stage.secondBrake && stage.charged.elapsed >= stage.secondBrake.elapsed)) releaseAndCharge -= 6;
     if (!stage.cruiseNotch) releaseAndCharge -= 3;
     if (!stage.secondBrake || !between(stage.secondBrake.speed, 9, 11)) releaseAndCharge -= 3;

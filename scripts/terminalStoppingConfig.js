@@ -83,7 +83,7 @@ export const SCENARIO = Object.freeze({
   tailQueryMaximumDifference: TWO_STAGE_BRAKING_PROFILE.tailQueryMaximumDifference,
   tailQueryPointRemaining: TWO_STAGE_BRAKING_PROFILE.tailQueryPointRemaining,
   secondBrakeRemaining: TWO_STAGE_BRAKING_PROFILE.secondBrakeRemaining,
-  secondBrakeForceMultiplier: 1.30,
+  secondBrakeForceMultiplier: 1.50,
   targetTolerance: 0.5,
   passTolerance: 2,
   stationName: '大山铺',

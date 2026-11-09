@@ -1,5 +1,5 @@
 import * as THREE from '../lib/three/three.module.js';
-import { MstsRouteScene } from './mstsRouteScene.js?v=two-stage-2';
+import { MstsRouteScene } from './mstsRouteScene.js?v=two-stage-3';
 
 export class TerminalStoppingScene extends MstsRouteScene {
   constructor(canvas, scenario, mode = 'training') {

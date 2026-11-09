@@ -34,7 +34,7 @@ function runStandard({ query = true, queryEarly = false, releaseSpeed = 12, seco
     }
     const firstBrake = state.events.find((event) => event.type === 'brake-application' && event.ordinal === 1);
     if (firstBrake && !tractionReleased && state.elapsed - firstBrake.elapsed >= SCENARIO.tractionReleaseDelay) {
-      for (const notch of [3, 2, 1, 0]) simulation.command('traction', notch);
+      for (const notch of [3, 2, 1]) simulation.command('traction', notch);
       tractionReleased = true;
     }
     if (queryEarly && firstBrake && !queried && state.elapsed - firstBrake.elapsed >= 8) {
@@ -43,7 +43,6 @@ function runStandard({ query = true, queryEarly = false, releaseSpeed = 12, seco
     }
     if (firstApplied && !firstReleased && state.speed <= releaseSpeed) {
       simulation.command('auto-brake', 0);
-      simulation.command('traction', 1);
       firstReleased = true;
     }
     const charged = state.trainPipe >= 595
@@ -107,6 +106,45 @@ test('标准流程形成两次独立初制动且中间完成缓解充风', () =>
   assert.ok(events.some((event) => event.type === 'brake-release' && event.ordinal === 1));
   assert.ok(events.some((event) => event.type === 'brake-pipe-charged'));
   assert.ok(events.some((event) => event.type === 'traction' && event.value === 1));
+});
+
+test('教学模式按实操顺序退至1级、10公里缓解、低速走行和列尾查询均记入进度', () => {
+  const simulation = new TerminalStoppingSimulation('training');
+  simulation.start();
+  simulation.command('teaching-continue');
+  simulation.command('lkj-open');
+  simulation.command('callout');
+  simulation.state.distance = SCENARIO.firstBrakePoint;
+  simulation.command('auto-brake', 1);
+  simulation.command('side-release', true);
+  simulation.command('side-release', false);
+  const firstBrake = simulation.state.events.find((event) => event.type === 'brake-application');
+  let tractionReduced = false;
+  let released = false;
+  let minimumSpeedBeforeCharge = Number.POSITIVE_INFINITY;
+  for (let index = 0; index < 20_000; index += 1) {
+    if (simulation.state.status === 'teaching-paused') simulation.command('teaching-continue');
+    if (!tractionReduced && simulation.state.elapsed - firstBrake.elapsed >= SCENARIO.tractionReleaseDelay) {
+      simulation.command('traction-drag', 1);
+      tractionReduced = true;
+    }
+    if (tractionReduced && !released && simulation.state.speed <= 10.04) {
+      simulation.command('auto-brake', 0);
+      released = true;
+    }
+    if (released) minimumSpeedBeforeCharge = Math.min(minimumSpeedBeforeCharge, simulation.state.speed);
+    const charged = simulation.state.events.find((event) => event.type === 'brake-pipe-charged');
+    if (charged) {
+      simulation.command('cir-action', { type: 'tail-query', pressure: Math.round(simulation.state.tailPipe) });
+      break;
+    }
+    simulation.tick(.05);
+  }
+  const progress = new TerminalStoppingAssessment(simulation).progress();
+  assert.deepEqual(progress.checks.slice(2, 8), [true, true, true, true, true, true]);
+  assert.ok(minimumSpeedBeforeCharge >= 9, `minimum speed ${minimumSpeedBeforeCharge}`);
+  const reductions = simulation.state.events.filter((event) => event.type === 'traction').map((event) => event.value);
+  assert.deepEqual(reductions.slice(-3), [3, 2, 1]);
 });
 
 test('未查询列尾风压不得评为合格', () => {

@@ -1,9 +1,9 @@
-import { CAB, PROJECT_ID, SCENARIO, TRACTION_MAX } from './terminalStoppingConfig.js?v=two-stage-2';
-import { TerminalStoppingSimulation } from './terminalStoppingSimulation.js?v=two-stage-2';
-import { TerminalStoppingAssessment } from './terminalStoppingAssessment.js?v=two-stage-2';
-import { TerminalStoppingScene } from './terminalStoppingScene.js?v=two-stage-2';
-import { LkjRuntime } from './lkjRuntime.js?v=two-stage-2';
-import { CirRuntime } from './cirRuntime.js?v=two-stage-2';
+import { CAB, PROJECT_ID, SCENARIO, TRACTION_MAX } from './terminalStoppingConfig.js?v=two-stage-3';
+import { TerminalStoppingSimulation } from './terminalStoppingSimulation.js?v=two-stage-3';
+import { TerminalStoppingAssessment } from './terminalStoppingAssessment.js?v=two-stage-3';
+import { TerminalStoppingScene } from './terminalStoppingScene.js?v=two-stage-3';
+import { LkjRuntime } from './lkjRuntime.js?v=two-stage-3';
+import { CirRuntime } from './cirRuntime.js?v=two-stage-3';
 import {
   clearCandidateDraft,
   createCandidateAttempt,
@@ -11,7 +11,7 @@ import {
   loadCandidateDraft,
   saveCandidateDraft,
   validateCandidate,
-} from './terminalStoppingCandidate.js?v=two-stage-2';
+} from './terminalStoppingCandidate.js?v=two-stage-3';
 
 const $ = (selector) => document.querySelector(selector);
 const pct = (value, total) => `${value / total * 100}%`;
@@ -312,7 +312,7 @@ window.addEventListener('pointermove', (event) => {
   const value = clamp(activeDrag.startValue + change, activeDrag.min, activeDrag.max);
   if (value === simulation.state[activeDrag.stateKey]) return;
   activeDrag.moved = true;
-  simulation.command(activeDrag.id === 'auto' ? 'auto-brake' : activeDrag.id === 'independent' ? 'independent-brake' : 'traction', value);
+  simulation.command(activeDrag.id === 'auto' ? 'auto-brake' : activeDrag.id === 'independent' ? 'independent-brake' : 'traction-drag', value);
 }, { passive: false });
 function finishControlDrag(event) {
   if (!activeDrag) {
@@ -333,8 +333,8 @@ let routeWarmPromise = null;
 function warmTerminalAssets() {
   if (routeWarmPromise) return routeWarmPromise;
   const urls = [
-    new URL('../assets/msts-neiyi-corridor/neiyi-dashanpu-terminal-scene.json?v=two-stage-2', import.meta.url),
-    new URL('../assets/msts-neiyi/neiyi-5635-trackdb-path-aligned.json?v=two-stage-2', import.meta.url),
+    new URL('../assets/msts-neiyi-corridor/neiyi-dashanpu-terminal-scene.json?v=two-stage-3', import.meta.url),
+    new URL('../assets/msts-neiyi/neiyi-5635-trackdb-path-aligned.json?v=two-stage-3', import.meta.url),
     new URL('../assets/msts-neiyi-corridor/neiyi-dashanpu-terrain-native.json', import.meta.url),
   ];
   routeWarmPromise = Promise.all(urls.map((url) => fetch(url).then((response) => {
@@ -491,7 +491,7 @@ function syncTeachingPause(s) {
 }
 
 function renderProgress(progress) {
-  const names = ['LKJ查看记录', '信号呼唤记录', '第一次制动后逐级退牵', '第一次初制动', '13–10 km/h缓解', '列车管充风完成', '牵引1级低速走行', 'CIR列尾风压查询', '第二次初制动', '停车记录', '防溜记录', '任务完成'];
+  const names = ['LKJ查看记录', '信号呼唤记录', '第一次制动后逐级退牵至1级', '第一次初制动', '13–10 km/h缓解', '列车管充风完成', '牵引1级低速走行', 'CIR列尾风压查询', '第二次初制动', '停车记录', '防溜记录', '任务完成'];
   $('#progress-list').innerHTML = names.map((name, index) => `<li class="${progress.checks[index] ? 'done' : 'pending'}">${name}</li>`).join('');
 }
 

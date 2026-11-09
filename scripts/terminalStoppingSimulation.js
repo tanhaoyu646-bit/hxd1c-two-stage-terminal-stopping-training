@@ -11,7 +11,7 @@ import {
   signalAt,
   trainingBand,
   tractionTargetSpeed,
-} from './terminalStoppingConfig.js?v=two-stage-2';
+} from './terminalStoppingConfig.js?v=two-stage-3';
 
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 
@@ -90,6 +90,16 @@ export class TerminalStoppingSimulation extends EventTarget {
   command(type, value) {
     const s = this.state;
     if (s.completed) return false;
+    if (type === 'traction-drag') {
+      const target = clamp(Math.round(Number(value) || 0), -DYNAMIC_BRAKE_MAX, TRACTION_MAX);
+      const direction = Math.sign(target - s.traction);
+      if (!direction) return false;
+      let changed = false;
+      for (let notch = s.traction + direction; direction > 0 ? notch <= target : notch >= target; notch += direction) {
+        changed = this.command('traction', notch) || changed;
+      }
+      return changed;
+    }
     if (type === 'teaching-continue') {
       if (s.mode !== 'training' || s.status !== 'teaching-paused' || !s.teachingPause) return false;
       const lessonId = s.teachingPause.id;
@@ -127,7 +137,7 @@ export class TerminalStoppingSimulation extends EventTarget {
         s.workflowStage = previousApplications === 0 ? 'first-brake' : 'second-brake';
       }
       if (s.autoBrake === 0 && previous.autoBrake > 0) {
-        this.log('brake-release', { ordinal: s.brakeApplicationOrdinal, from: previous.autoBrake });
+        this.log('brake-release', { ordinal: s.brakeApplicationOrdinal, from: previous.autoBrake, traction: s.traction });
         if (s.brakeApplicationOrdinal === 1) s.workflowStage = 'recharge';
       }
       if (s.autoBrake > previous.autoBrake && previous.autoBrake > 0) {
@@ -223,8 +233,15 @@ export class TerminalStoppingSimulation extends EventTarget {
       const tractionEnvelope = Math.min(520_000, 7_200_000 / Math.max(.5, speedMps));
       const tractionAuthority = s.traction > 0 ? clamp(.72 + .28 * s.traction / TRACTION_MAX, 0, 1) : 0;
       const holdingForce = rollingResistance;
-      const controllerGain = s.traction === 1 && s.brakeApplicationOrdinal >= 1 ? .022 : .0075;
-      const controllerForce = holdingForce + speedError * mass * controllerGain;
+      const residualPneumaticForce = automaticCylinder * 2_126 + Math.max(0, automaticCylinder - 110) * 4_000;
+      const rechargeHoldingForce = s.traction === 1
+        && s.autoBrake === 0
+        && s.brakeApplicationOrdinal === 1
+        && s.speed <= SCENARIO.lowSpeedTarget + .5
+        ? residualPneumaticForce
+        : 0;
+      const controllerGain = s.traction === 1 && s.brakeApplicationOrdinal >= 1 ? .03 : .0075;
+      const controllerForce = holdingForce + rechargeHoldingForce + speedError * mass * controllerGain;
       // 与途中调速项目一致：正级位是目标速度给定。达到或超过给定速度即卸载，
       // 低于目标速度时才按阻力和速度偏差恢复牵引力。
       const tractionForce = s.traction > 0 && speedError > 0 && s.autoBrake === 0 && s.lkjForcedBrake === 0 && s.lkjLevel !== 'unload'
@@ -321,7 +338,8 @@ export class TerminalStoppingSimulation extends EventTarget {
       && s.trainPipe >= 595
       && s.tailPipe >= SCENARIO.tailQueryMinimumPressure
       && Math.abs(s.trainPipe - s.tailPipe) <= SCENARIO.tailQueryMaximumDifference;
-    if (charged && !this.crossed.has('brake-pipe-charged')) {
+    const justCharged = charged && !this.crossed.has('brake-pipe-charged');
+    if (justCharged) {
       this.crossed.add('brake-pipe-charged');
       this.log('brake-pipe-charged', { trainPipe: s.trainPipe, tailPipe: s.tailPipe });
     }
@@ -329,7 +347,7 @@ export class TerminalStoppingSimulation extends EventTarget {
       if (previousDistance < SCENARIO.entryDistance && s.distance >= SCENARIO.entryDistance) this.pauseTeaching('entry-reference');
       else if (previousDistance < SCENARIO.firstBrakePoint && s.distance >= SCENARIO.firstBrakePoint) this.pauseTeaching('first-brake');
       else if (crossedReleaseWindow) this.pauseTeaching('first-release');
-      else if (charged) this.pauseTeaching('recharge-complete');
+      else if (justCharged) this.pauseTeaching('recharge-complete');
       else if (previousDistance < SCENARIO.tailQueryPoint && s.distance >= SCENARIO.tailQueryPoint) this.pauseTeaching('tail-pressure');
       else if (previousDistance < SCENARIO.secondBrakePoint && s.distance >= SCENARIO.secondBrakePoint) this.pauseTeaching('second-brake');
     }
@@ -377,12 +395,12 @@ export class TerminalStoppingSimulation extends EventTarget {
       'first-brake': {
         title: '实施第一次初制动',
         body: `当前LKJ距出站约${exitRemaining.toFixed(0)} m、距停车标约${remaining.toFixed(0)} m、速度${s.speed.toFixed(1)} km/h；按当前速度计算的制动距离约${selectedBrakeDistance.toFixed(0)} m。`,
-        focus: `自阀置初制位形成约50 kPa减压，保持平稳；列车稳定降速约${SCENARIO.tractionReleaseDelay}秒后，逐级退回牵引手柄至零位。`,
+        focus: `自阀置初制位形成约50 kPa减压，保持平稳；列车稳定降速约${SCENARIO.tractionReleaseDelay}秒后，逐级退回牵引手柄至1级。`,
       },
       'first-release': {
         title: '第一次制动缓解',
         body: `速度已降至${s.speed.toFixed(1)} km/h，进入${SCENARIO.firstReleaseMaximumSpeed}–${SCENARIO.firstReleaseMinimumSpeed} km/h缓解窗口。`,
-        focus: '确认自阀排风已经停止后，将自阀移至运转位充风；随后将主手柄置牵引1级，以10 km/h目标速度平稳走行。',
+        focus: '确认自阀排风已经停止后，将自阀移至运转位充风；主手柄保持牵引1级，以10 km/h目标速度平稳走行。',
       },
       'recharge-complete': {
         title: '确认列车管充风',
@@ -470,9 +488,10 @@ export class TerminalStoppingSimulation extends EventTarget {
     if (!firstRelease && brakingElapsed < SCENARIO.tractionReleaseDelay) {
       return `保持低牵引，确认列车稳定降速；约 ${Math.ceil(SCENARIO.tractionReleaseDelay - brakingElapsed)} 秒后逐级退回主手柄`;
     }
-    if (!firstRelease && s.traction > 0) return '列车已稳定降速：逐级退回牵引手柄至零位';
+    if (!firstRelease && s.traction > 1) return '列车已稳定降速：逐级退回牵引手柄至1级';
     if (!firstRelease && s.speed > SCENARIO.firstReleaseMaximumSpeed) return '保持第一次50 kPa初减，平稳降速至13–10 km/h缓解窗口';
-    if (!firstRelease) return '速度已进入13–10 km/h窗口：自阀移至运转位充风，再将主手柄置牵引1级';
+    if (!firstRelease) return '速度已进入13–10 km/h窗口：主手柄保持1级，自阀移至运转位充风';
+    if (s.traction !== 1) return '第一次制动已缓解：将主手柄置牵引1级，维持约10 km/h低速走行';
     if (!charged) return `自阀保持运转位充风，牵引1级维持约10 km/h；当前列尾 ${s.tailPipe.toFixed(0)} kPa`;
     if (!tailQuery && remaining <= SCENARIO.tailQueryPointRemaining) return '打开CIR按“风压查询”，确认列尾风压充足后再进行第二次制动';
     if (!secondBrake && remaining > SCENARIO.secondBrakeRemaining) return '以约10 km/h继续走行，距停车标20 m处准备第二次初制动';

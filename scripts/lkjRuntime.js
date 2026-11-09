@@ -3,7 +3,7 @@ import {
   absoluteKilometerAt,
   lkjControlLimit,
   routeFacilitiesForScenario,
-} from './terminalStoppingConfig.js?v=two-stage-2';
+} from './terminalStoppingConfig.js?v=two-stage-3';
 
 const pct = (value, total) => `${value / total * 100}%`;
 const fmt = (value, digits = 0) => Number(value || 0).toFixed(digits);
